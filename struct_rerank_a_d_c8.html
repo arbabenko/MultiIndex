@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>MultiIndex: MultiIndex</title>
+<title>MultiIndex: RerankADC8 Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -35,9 +35,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -57,7 +57,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -72,22 +78,95 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_rerank_a_d_c8-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title"><a class="el" href="struct_multi_index.html">MultiIndex</a> </div>  </div>
+<div class="title">RerankADC8 Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This is a brief explanation to sources of <a href="http://download.yandex.ru/company/cvpr2012.pdf">inverted multiindex algorithm</a> for fast approximate search of nearest neighbours in highdimensional spaces.</p>
-<ul>
-<li><a class="el" href="_how_to_install.html">How to install</a></li>
+
+<p><code>#include &lt;<a class="el" href="data__util_8h_source.html">data_util.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:afbf297abe7a2188912171012e932657a"><td class="memTemplParams" colspan="2">template&lt;class Archive &gt; </td></tr>
+<tr class="memitem:afbf297abe7a2188912171012e932657a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_rerank_a_d_c8.html#afbf297abe7a2188912171012e932657a">serialize</a> (Archive &amp;arc, unsigned int version)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ac6089ff386f4f2b0f3162da9756f2708"><td class="memItemLeft" align="right" valign="top"><a class="el" href="data__util_8h.html#a3c83f911d17be05213ea94cf92f6a017">PointId</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_rerank_a_d_c8.html#ac6089ff386f4f2b0f3162da9756f2708">pid</a></td></tr>
+<tr class="memitem:ad9f29b5090bcca326da364a05bd0a3e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="data__util_8h.html#a25e683739379cc0804a680dfcc76f57f">FineClusterId</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_rerank_a_d_c8.html#ad9f29b5090bcca326da364a05bd0a3e4">quantizations</a> [8]</td></tr>
+</table>
+<h2>Member Function Documentation</h2>
+<a class="anchor" id="afbf297abe7a2188912171012e932657a"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Archive &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RerankADC8::serialize </td>
+          <td>(</td>
+          <td class="paramtype">Archive &amp;&#160;</td>
+          <td class="paramname"><em>arc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>version</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2>Member Data Documentation</h2>
+<a class="anchor" id="ac6089ff386f4f2b0f3162da9756f2708"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="data__util_8h.html#a3c83f911d17be05213ea94cf92f6a017">PointId</a> RerankADC8::pid</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad9f29b5090bcca326da364a05bd0a3e4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="data__util_8h.html#a25e683739379cc0804a680dfcc76f57f">FineClusterId</a> RerankADC8::quantizations[8]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li><a class="el" href="data__util_8h_source.html">data_util.h</a></li>
 </ul>
-<ul>
-<li><a class="el" href="_indexation.html">How to index</a></li>
-</ul>
-<ul>
-<li><a class="el" href="_search.html">How to search</a> </li>
-</ul>
-</div></div><!-- contents -->
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated on Sat Aug 11 2012 19:15:24 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
