@@ -120,7 +120,7 @@ typedef std::vector<Point> Centroids;
  */
 enum PointType {
   FVEC,
-	BVEC
+  BVEC
 };
 
 /**
@@ -129,17 +129,17 @@ enum PointType {
  * centroids subtraction
  */
 enum RerankMode {
-	USE_RESIDUALS, 
-	USE_INIT_POINTS
+  USE_RESIDUALS, 
+  USE_INIT_POINTS
 };
 
 /**
- * \struct Multiindex incorporates all data structures we need to make search
+ * \struct MultiIndex incorporates all data structures we need to make search
  */
 template<class Record>
 struct MultiIndex {
   vector<Record> multiindex;
-	Multitable<int> cell_edges;    ///< Table with index cell edges in array
+  Multitable<int> cell_edges;    ///< Table with index cell edges in array
 };
 
 /**
@@ -176,27 +176,27 @@ inline U Round(T number) {
  */
 template<class T, class U>
 void ReadPoints(const string& filename,
-	              vector<vector<U> >* points,
-				        int count) {
+                vector<vector<U> >* points,
+                int count) {
   ifstream input;
 	input.open(filename.c_str(), ios::binary);
   if(!input.good()) {
     throw std::logic_error("Invalid filename");
   }
-	points->resize(count);
-	int dimension;
-	for(PointId pid = 0; pid < count; ++pid) {
-	  input.read((char*)&dimension, sizeof(dimension));
+  points->resize(count);
+  int dimension;
+  for(PointId pid = 0; pid < count; ++pid) {
+    input.read((char*)&dimension, sizeof(dimension));
     if(dimension <= 0) {
       throw std::logic_error("Bad file content: non-positive dimension");
     }
-		points->at(pid).resize(dimension);
-		for(Dimensions d = 0; d < dimension; ++d) {
-		  T buffer;
-			input.read((char*)&(buffer), sizeof(T));
-			points->at(pid)[d] = Round<T, U>(buffer);
-		}
-	}
+    points->at(pid).resize(dimension);
+    for(Dimensions d = 0; d < dimension; ++d) {
+      T buffer;
+      input.read((char*)&(buffer), sizeof(T));
+      points->at(pid)[d] = Round<T, U>(buffer);
+    }
+  }
 }
 
 /**
@@ -211,17 +211,17 @@ void ReadVector(ifstream& input, vector<U>* v) {
   if(!input.good()) {
     throw std::logic_error("Bad input stream");
   }
-	int dimension;
-	input.read((char*)&dimension, sizeof(dimension));
+  int dimension;
+  input.read((char*)&dimension, sizeof(dimension));
   if(dimension <= 0) {
     throw std::logic_error("Bad file content: non-positive dimension");
   }
-	v->resize(dimension);
-	for(Dimensions d = 0; d < dimension; ++d) {
-		T buffer;
-		input.read((char*)&buffer, sizeof(buffer));
-		v->at(d) = Round<T, U>(buffer);
-	}    
+  v->resize(dimension);
+  for(Dimensions d = 0; d < dimension; ++d) {
+    T buffer;
+    input.read((char*)&buffer, sizeof(buffer));
+    v->at(d) = Round<T, U>(buffer);
+  }    
 }
 
 /**
@@ -234,20 +234,20 @@ void ReadVector(ifstream& input, vector<U>* v) {
 template<class T>
 void ReadVocabulary(ifstream& input,
                     Dimensions dimension,
-				            int vocabulary_size,
+                    int vocabulary_size,
                     Centroids* centroids) {
   if(!input.good()) {
     throw std::logic_error("Bad input stream");
   }
   centroids->resize(vocabulary_size);
-	for(ClusterId centroid_index = 0; centroid_index < centroids->size(); ++centroid_index) {
-		centroids->at(centroid_index).resize(dimension);
-		for(Dimensions dimension_index = 0; dimension_index < dimension; ++dimension_index) {
-			T buffer;
-			input.read((char*)&buffer, sizeof(buffer));
-			centroids->at(centroid_index)[dimension_index] = Round<T, Coord>(buffer);
-		}
-	}
+  for(ClusterId centroid_index = 0; centroid_index < centroids->size(); ++centroid_index) {
+    centroids->at(centroid_index).resize(dimension);
+    for(Dimensions dimension_index = 0; dimension_index < dimension; ++dimension_index) {
+      T buffer;
+      input.read((char*)&buffer, sizeof(buffer));
+      centroids->at(centroid_index)[dimension_index] = Round<T, Coord>(buffer);
+    }
+  }
 }
 
 /**
@@ -262,26 +262,26 @@ void ReadVocabulary(ifstream& input,
 template<class T>
 void ReadVocabularies(const string& filename,
                       Dimensions space_dimension,
-	                    vector<Centroids>* centroids) {
+                      vector<Centroids>* centroids) {
   ifstream vocabulary;
-	vocabulary.open(filename.c_str(), ios::binary);
+  vocabulary.open(filename.c_str(), ios::binary);
   if(!vocabulary.good()) {
     throw std::logic_error("Bad vocabulary file");
   }
-	int dimension;
-	vocabulary.read((char*)&dimension, sizeof(dimension));
+  int dimension;
+  vocabulary.read((char*)&dimension, sizeof(dimension));
   if(dimension <= 0) {
     throw std::logic_error("Bad file content: non-positive dimension");
   }
-	int vocabs_count = space_dimension / dimension;
+  int vocabs_count = space_dimension / dimension;
   if(space_dimension < dimension) {
     throw std::logic_error("Space dimension is less than vocabulary dimension");
   }
-	centroids->resize(vocabs_count);
-	int vocabulary_size;
-	vocabulary.read((char*)&vocabulary_size, sizeof(vocabulary_size));
-	for(int vocab_item = 0; vocab_item < vocabs_count; ++vocab_item) {
-		ReadVocabulary<T>(vocabulary, dimension, vocabulary_size, &(centroids->at(vocab_item)));
+  centroids->resize(vocabs_count);
+  int vocabulary_size;
+  vocabulary.read((char*)&vocabulary_size, sizeof(vocabulary_size));
+  for(int vocab_item = 0; vocab_item < vocabs_count; ++vocab_item) {
+    ReadVocabulary<T>(vocabulary, dimension, vocabulary_size, &(centroids->at(vocab_item)));
   }
 }
 
@@ -293,27 +293,27 @@ void ReadVocabularies(const string& filename,
 template<class T>
 void ReadFineVocabs(const string& fine_vocabs_filename, vector<Centroids>* fine_vocabs) {
   ifstream fine_vocabs_stream;
-	fine_vocabs_stream.open(fine_vocabs_filename.c_str(), ios::binary);
+  fine_vocabs_stream.open(fine_vocabs_filename.c_str(), ios::binary);
   if(!fine_vocabs_stream.good()) {
     throw std::logic_error("Bad fine vocabulary file");
   }
-	int vocabs_count, centroids_count, vocabs_dim;
-	fine_vocabs_stream.read((char*)&vocabs_count, sizeof(vocabs_count));
+  int vocabs_count, centroids_count, vocabs_dim;
+  fine_vocabs_stream.read((char*)&vocabs_count, sizeof(vocabs_count));
   if(vocabs_count < 1) {
     throw std::logic_error("Bad fine vocabulary file content: number of vocabularies < 1");
   }
-	fine_vocabs_stream.read((char*)&centroids_count, sizeof(centroids_count));
+  fine_vocabs_stream.read((char*)&centroids_count, sizeof(centroids_count));
   if(centroids_count < 1) {
     throw std::logic_error("Bad fine vocabulary file content: vocabulary capacity < 1");
   }
-	fine_vocabs_stream.read((char*)&vocabs_dim, sizeof(vocabs_dim));
+  fine_vocabs_stream.read((char*)&vocabs_dim, sizeof(vocabs_dim));
   if(vocabs_dim < 1) {
     throw std::logic_error("Bad fine vocabulary file content: vocabulary dimension < 1");
   }
-	fine_vocabs->resize(vocabs_count);
-	for(int voc_index = 0; voc_index < vocabs_count; ++voc_index) {
-		ReadVocabulary<T>(fine_vocabs_stream, vocabs_dim, centroids_count, &(fine_vocabs->at(voc_index)));
-	}
+  fine_vocabs->resize(vocabs_count);
+  for(int voc_index = 0; voc_index < vocabs_count; ++voc_index) {
+    ReadVocabulary<T>(fine_vocabs_stream, vocabs_dim, centroids_count, &(fine_vocabs->at(voc_index)));
+  }
 }
 
 /**
@@ -325,9 +325,9 @@ void ReadFineVocabs(const string& fine_vocabs_filename, vector<Centroids>* fine_
  * @param subpoints result subpoints
  */
 void GetSubpoints(const Points& points,
-	                const Dimensions start_dim,
-				          const Dimensions final_dim,
-				          Points* subpoints);
+                  const Dimensions start_dim,
+                  const Dimensions final_dim,
+                  Points* subpoints);
 
 /**
  * This function returns identifier of clusters which centroid is the nearest to 
@@ -338,7 +338,7 @@ void GetSubpoints(const Points& points,
  * @param final_dim dimension after the last dimension of subpoint
  */
 ClusterId GetNearestClusterId(const Point& point, const Centroids& centroids,
-	                            const Dimensions start_dim, const Dimensions final_dim);
+                              const Dimensions start_dim, const Dimensions final_dim);
 
 /**
  * This function calculates quantization residual. 
@@ -348,7 +348,7 @@ ClusterId GetNearestClusterId(const Point& point, const Centroids& centroids,
  * @param residual result residual
  */
 void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
-	               const vector<Centroids>& centroids, Point* residual);
+                 const vector<Centroids>& centroids, Point* residual);
 /**
  * This function calculates quantization residual. 
  * @param point initial point
@@ -357,7 +357,7 @@ void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizati
  * @param residual pointer to start of residual
  */
 void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
-	               const vector<Centroids>& centroids, Coord* residual);
+                 const vector<Centroids>& centroids, Coord* residual);
 
 /**
  * This function finds nearest cluster identifiers for points from start_pid to final_pid.
@@ -368,8 +368,8 @@ void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizati
  * @param final_pid point after the last point function finds nearest cluster
  */
 void GetNearestClusterIdsForPointSubset(const Points& points, const Centroids& centroids,
-	                                      const PointId start_pid, const PointId final_pid,
-								                        vector<ClusterId>* nearest);
+                                        const PointId start_pid, const PointId final_pid,
+                                        vector<ClusterId>* nearest);
 
 /**
  * This function finds cluster identifiers nearest to subpoints for a number of points.
@@ -382,9 +382,8 @@ void GetNearestClusterIdsForPointSubset(const Points& points, const Centroids& c
  * @param nearest result
  */
 void GetNearestClusterIdsForSubpoints(const Points& points, const Centroids& centroids,
-	                                    const Dimensions start_dim, const Dimensions final_dim,
-									                    int threads_count, 
-						                          vector<ClusterId>* nearest);
+                                      const Dimensions start_dim, const Dimensions final_dim,
+                                      int threads_count, vector<ClusterId>* nearest);
 
 /**
  * This function calculates points coarse product quantizations
@@ -394,8 +393,8 @@ void GetNearestClusterIdsForSubpoints(const Points& points, const Centroids& cen
  * @param coarse_quantizations result quantizations
  */
 void GetPointsCoarseQuaintizations(const Points& points, const vector<Centroids>& centroids,
-	                                 const int threads_count,
-	                                 vector<CoarseQuantization>* coarse_quantizations);
+                                   const int threads_count,
+                                   vector<CoarseQuantization>* coarse_quantizations);
 
 
 /**
@@ -403,7 +402,7 @@ void GetPointsCoarseQuaintizations(const Points& points, const vector<Centroids>
  */
 struct IndexConfig {
   RerankMode rerank_mode;
-	vector<Centroids> fine_vocabs;
+  vector<Centroids> fine_vocabs;
 };
 
 /**
@@ -411,13 +410,13 @@ struct IndexConfig {
  * id of point and 8 bytes for ADC reranking
  */
 struct RerankADC8 {
-	PointId pid;
-	FineClusterId quantizations[8];
-	template<class Archive>
-	void serialize(Archive& arc, unsigned int version) {
-		arc & pid;
-		arc & quantizations;
-	}
+  PointId pid;
+  FineClusterId quantizations[8];
+  template<class Archive>
+  void serialize(Archive& arc, unsigned int version) {
+    arc & pid;
+    arc & quantizations;
+  }
 };
 
 /**
@@ -425,13 +424,13 @@ struct RerankADC8 {
  * id of point and 16 bytes for ADC reranking
  */
 struct RerankADC16 {
-	PointId pid;
-	FineClusterId quantizations[16];
-	template<class Archive>
-	void serialize(Archive& arc, unsigned int version) {
-		arc & pid;
-		arc & quantizations;
-	}
+  PointId pid;
+  FineClusterId quantizations[16];
+  template<class Archive>
+  void serialize(Archive& arc, unsigned int version) {
+    arc & pid;
+    arc & quantizations;
+  }
 };
 
 

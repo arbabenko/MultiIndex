@@ -98,27 +98,27 @@ int SetOptions(int argc, char** argv) {
     return 1;
   }
 
-	THREADS_COUNT =              name_to_value["threads_count"].as<int>();
-	multiplicity =               name_to_value["multiplicity"].as<int>();
-	points_file =                name_to_value["points_file"].as<string>();
-	metainfo_file =              name_to_value["metainfo_file"].as<string>();
-	coarse_vocabs_file =         name_to_value["coarse_vocabs_file"].as<string>();
-	fine_vocabs_file =           name_to_value["fine_vocabs_file"].as<string>();
-	SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
-	files_prefix =               name_to_value["files_prefix"].as<string>();
-	points_count =               name_to_value["points_count"].as<int>();
+  THREADS_COUNT =              name_to_value["threads_count"].as<int>();
+  multiplicity =               name_to_value["multiplicity"].as<int>();
+  points_file =                name_to_value["points_file"].as<string>();
+  metainfo_file =              name_to_value["metainfo_file"].as<string>();
+  coarse_vocabs_file =         name_to_value["coarse_vocabs_file"].as<string>();
+  fine_vocabs_file =           name_to_value["fine_vocabs_file"].as<string>();
+  SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
+  files_prefix =               name_to_value["files_prefix"].as<string>();
+  points_count =               name_to_value["points_count"].as<int>();
  
   build_coarse_quantizations = (name_to_value["build_coarse"].as<bool>() == true) ? true : false;
   mode = name_to_value["use_residuals"].as<bool>() == true ? USE_RESIDUALS : USE_INIT_POINTS;
 
-	if (name_to_value.find("coarse_quantization_file") != name_to_value.end()) {
+  if (name_to_value.find("coarse_quantization_file") != name_to_value.end()) {
     coarse_quantizations_file =  name_to_value["coarse_quantization_file"].as<string>();
-	}
+  }
   if (name_to_value["input_point_type"].as<string>() == "FVEC") {
     point_type = FVEC;
-	} else if(name_to_value["input_point_type"].as<string>() == "BVEC") {
+  } else if(name_to_value["input_point_type"].as<string>() == "BVEC") {
     point_type = BVEC;
-	}
+  }
   return 0;
 }
 
