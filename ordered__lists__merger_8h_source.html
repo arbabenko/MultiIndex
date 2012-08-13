@@ -96,7 +96,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00023"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html">   23</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_ordered_lists_merger.html">OrderedListsMerger</a> {</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <a class="code" href="class_ordered_lists_merger.html#a8bfe6667b3d74ff5e051ba0f35446614">OrderedListsMerger</a>();</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="class_ordered_lists_merger.html#ab976ae612228baabd66e5d6ee81758d4">setLists</a>(<span class="keyword">const</span> vector&lt;vector&lt;pair&lt;OrderType, MetaInfo&gt; &gt; &gt;&amp; lists);</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_ordered_lists_merger.html#ab976ae612228baabd66e5d6ee81758d4">setLists</a>(<span class="keyword">const</span> vector&lt;vector&lt;pair&lt;OrderType, MetaInfo&gt; &gt; &gt;&amp; lists);</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_ordered_lists_merger.html#aea7c1030fb3be2e07021b898ec288118">GetNextMergedItemIndices</a>(<a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a>* merged_item_indices);</div>
 <div class="line"><a name="l00043"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#adf69b73a34ec9b6b0c62ee637b5db687">   43</a></span>&#160;  <span class="keyword">const</span> vector&lt;vector&lt;pair&lt;OrderType, MetaInfo&gt; &gt; &gt;* <a class="code" href="class_ordered_lists_merger.html#adf69b73a34ec9b6b0c62ee637b5db687">lists_ptr</a>;</div>
 <div class="line"><a name="l00047"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#a16f1140ea8e582ef410cdd163e7a951d">   47</a></span>&#160;  <a class="code" href="struct_multitable.html">Multitable&lt;char&gt;</a>&amp; <a class="code" href="class_ordered_lists_merger.html#a16f1140ea8e582ef410cdd163e7a951d">GetYieldedItems</a>() {</div>
@@ -116,57 +116,57 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> OrderType, <span class="keyword">class</span> MetaInfo&gt;</div>
 <div class="line"><a name="l00078"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#ae6dfde718eb60f9487be7cb86d9e96f5">   78</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="class_ordered_lists_merger.html#ae6dfde718eb60f9487be7cb86d9e96f5">OrderedListsMerger&lt;OrderType, MetaInfo&gt;::InsertMergedItemIndicesInHeap</a>(<span class="keyword">const</span> <a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a>&amp; merged_item_indices) {</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        OrderType sum = 0;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists_ptr-&gt;size(); ++list_index) {</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                sum += lists_ptr-&gt;at(list_index)[merged_item_indices[list_index]].first;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        }</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        heap_.insert(std::make_pair(sum, merged_item_indices));</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  OrderType sum = 0;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists_ptr-&gt;size(); ++list_index) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    sum += lists_ptr-&gt;at(list_index)[merged_item_indices[list_index]].first;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  }</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  heap_.insert(std::make_pair(sum, merged_item_indices));</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;}</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> OrderType, <span class="keyword">class</span> MetaInfo&gt;</div>
 <div class="line"><a name="l00087"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#ab976ae612228baabd66e5d6ee81758d4">   87</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="class_ordered_lists_merger.html#ab976ae612228baabd66e5d6ee81758d4">OrderedListsMerger&lt;OrderType, MetaInfo&gt;::setLists</a>(<span class="keyword">const</span> vector&lt;vector&lt;pair&lt;OrderType, MetaInfo&gt; &gt; &gt;&amp; lists) {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        lists_ptr = &amp;lists;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        heap_.clear();</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a> first_item_indices(lists.size());</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists.size(); ++list_index) {</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                first_item_indices[list_index] = 0;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        }</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        memset(&amp;(yielded_items_indices_.table[0]), 0, yielded_items_indices_.table.size());</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        InsertMergedItemIndicesInHeap(first_item_indices);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  lists_ptr = &amp;lists;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  heap_.clear();</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a> first_item_indices(lists.size());</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists.size(); ++list_index) {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    first_item_indices[list_index] = 0;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  memset(&amp;(yielded_items_indices_.table[0]), 0, yielded_items_indices_.table.size());</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  InsertMergedItemIndicesInHeap(first_item_indices);</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> OrderType, <span class="keyword">class</span> MetaInfo&gt;</div>
 <div class="line"><a name="l00099"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#a860f7e24dfad65f7d38e3c53c2177d92">   99</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="class_ordered_lists_merger.html#a860f7e24dfad65f7d38e3c53c2177d92">OrderedListsMerger&lt;OrderType, MetaInfo&gt;::UpdatePrioirityQueue</a>(<a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a>&amp; merged_item_indices) {</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists_ptr-&gt;size(); ++list_index) {</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                <span class="keywordflow">if</span>(merged_item_indices[list_index] &gt;= lists_ptr-&gt;at(list_index).size()) {</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keywordflow">if</span>(merged_item_indices[list_index] &gt;= lists_ptr-&gt;at(list_index).size()) {</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;      <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                }</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                <span class="keywordtype">int</span> current_index = merged_item_indices[list_index];</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                merged_item_indices[list_index] -= 1;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                <span class="keywordflow">if</span>(current_index &gt; 0 &amp;&amp; !yielded_items_indices_.GetValue(merged_item_indices)) {</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                        merged_item_indices[list_index] += 1;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                  <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                  merged_item_indices[list_index] += 1;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                }</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        }</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        InsertMergedItemIndicesInHeap(merged_item_indices);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    }</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordtype">int</span> current_index = merged_item_indices[list_index];</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    merged_item_indices[list_index] -= 1;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordflow">if</span>(current_index &gt; 0 &amp;&amp; !yielded_items_indices_.GetValue(merged_item_indices)) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      merged_item_indices[list_index] += 1;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      merged_item_indices[list_index] += 1;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  }</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  InsertMergedItemIndicesInHeap(merged_item_indices);</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;}</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> OrderType, <span class="keyword">class</span> MetaInfo&gt;</div>
 <div class="line"><a name="l00117"></a><span class="lineno"><a class="code" href="class_ordered_lists_merger.html#aea7c1030fb3be2e07021b898ec288118">  117</a></span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_ordered_lists_merger.html#aea7c1030fb3be2e07021b898ec288118">OrderedListsMerger&lt;OrderType, MetaInfo&gt;::GetNextMergedItemIndices</a>(<a class="code" href="ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af">MergedItemIndices</a>* next_merged_item_indices) {</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="keywordflow">if</span>(heap_.empty()) {</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        }</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        *next_merged_item_indices = heap_.begin()-&gt;second;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        yielded_items_indices_.SetValue(1, *next_merged_item_indices);</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists_ptr-&gt;size(); ++list_index) {</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  }</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  *next_merged_item_indices = heap_.begin()-&gt;second;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  yielded_items_indices_.SetValue(1, *next_merged_item_indices);</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> list_index = 0; list_index &lt; lists_ptr-&gt;size(); ++list_index) {</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    next_merged_item_indices-&gt;at(list_index) += 1;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                UpdatePrioirityQueue(*next_merged_item_indices);</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                next_merged_item_indices-&gt;at(list_index) -= 1;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        }</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;        heap_.erase(heap_.begin());</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    UpdatePrioirityQueue(*next_merged_item_indices);</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    next_merged_item_indices-&gt;at(list_index) -= 1;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  }</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  heap_.erase(heap_.begin());</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;}</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="keyword">template</span> <span class="keyword">class </span><a class="code" href="class_ordered_lists_merger.html">OrderedListsMerger&lt;Distance, PointId&gt;</a>;</div>
@@ -174,7 +174,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Aug 11 2012 19:15:23 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 13 2012 19:34:12 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>

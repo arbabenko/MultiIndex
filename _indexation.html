@@ -89,7 +89,7 @@ Algorithm</h1>
  <br/>
  Indexing consists of two stages: points space subdividing and calculating information for reranking. Because one can use different reranking approaches for the same space subdividing, after first stage algorithm saves on the HDD "coarse quantizations" for all points in the database. Coarse quantizations are just the identifiers of vocabulary items for all groups of dimensions. So if you already have file with coarse quantizations there is no need to calculate them again (miss the flag "&amp;ndash;build_coarse" in command line parameters).<br/>
  <br/>
- <a class="el" href="struct_multiindex.html">Multiindex</a> consists of long onedimensional array and table with edges of clusters in this array. <a class="el" href="class_multi_indexer.html">MultiIndexer</a> is a C++ template by the type of the record in this array. So you can easy implement your own reranking approach by defining new structure NewRecordType and implementing function GetRecord&lt;NewRecordType&gt; for your structure.<br/>
+ <a class="el" href="struct_multi_index.html">MultiIndex</a> consists of long onedimensional array and table with edges of clusters in this array. <a class="el" href="class_multi_indexer.html">MultiIndexer</a> is a C++ template by the type of the record in this array. So you can easy implement your own reranking approach by defining new structure NewRecordType and implementing function GetRecord&lt;NewRecordType&gt; for your structure.<br/>
  <br/>
  For indexing you should provide coarse vocabularies to build multiindex structure and fine vocabularies to calculate reranking information. We assume that these files are prepared outside this code (C++ is not the simplest way to create vocabularies).<br/>
 </p>
@@ -133,7 +133,7 @@ Search sample</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Aug 11 2012 19:15:23 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 13 2012 19:34:12 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>
