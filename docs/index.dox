@@ -1,0 +1,77 @@
+/** \page Indexation How to index
+
+\tableofcontents
+
+\section ALGO Algorithm
+
+The idea of indexing algorithm is described in our <a href=http://download.yandex.ru/company/cvpr2012.pdf>paper</a>, we write only details of implementation here.\n
+\n
+Indexing consists of two stages: points space subdividing and calculating information for reranking. Because one can use different reranking approaches for the same space subdividing, after first stage algorithm saves on the HDD "coarse quantizations" for all points in the database. Coarse quantizations are just the identifiers of vocabulary items for all groups of dimensions. So if you already have file with coarse quantizations there is no need to calculate them again (miss the flag "--build_coarse" in command line parameters).\n
+\n
+MultiIndex consists of long onedimensional array and table with edges of clusters in this array.
+MultiIndexer is a C++ template by the type of the record in this array. So you can easy implement your own reranking approach by defining new structure NewRecordType and implementing function GetRecord<NewRecordType> for your structure.\n
+\n
+For indexing you should provide coarse vocabularies to build multiindex structure and fine vocabularies to calculate reranking information. We assume that these files are prepared outside this code (C++ is not the simplest way to create vocabularies).\n
+
+\section FORMATS File formats
+
+- <b>Database</b> \n
+Our code can handle only databases in <a href=http://corpus-texmex.irisa.fr>.bvecs</a> or <a href=http://corpus-texmex.irisa.fr>.fvecs</a> format.\n
+- <b>Coarse vocabularies</b>\n
+Our code assumes that coarse vocabularies are in the next format:\n
+4 bytes(one int32) - number of items in each vocabulary (N)\n
+4 bytes(one int32) - dimension of item (d)\n
+4*N*d*M bytes(N*d*M floats) - vocabulary items one after another (M is the multiplicity of algorithm)\n
+\n
+Matlab script to build vocabularies
+\code
+clear all;
+
+all_data = bvecs_read('sift1M.bvecs');
+
+all_data = single(all_data);
+vocabSize = 4096;
+% add implementation of K-means
+vocab1 = kmeans(single(all_data(1:end/2,:)),vocabSize);
+vocab2 = kmeans(single(all_data(end/2+1:end,:)),vocabSize);
+
+file = fopen(['sift1M_4096_double_' num2str(vocabSize) '.dat'], 'w');
+dim = size(vocab1, 1);
+sz = size(vocab1, 2);
+fwrite(file, dim, 'int32');
+fwrite(file, sz, 'int32');
+fwrite(file, vocab1, 'float');
+fwrite(file, vocab2, 'float');
+fclose(file);
+save(['sift1M_4096_double_' num2str(vocabSize) '.mat'], 'vocab1', 'vocab2');
+\endcode
+- <b>Fine vocabularies</b>\n
+Our code assumes that fine vocabularies are in the next format:\n
+4 bytes(one int32) - number of vocabularies (m)\n
+4 bytes(one int32) - number of items in each vocabulary (N)\n
+4 bytes(one int32) - dimension of item (d)\n
+4*N*d*m bytes(N*d*m floats) - vocabulary items one after another\n
+
+\section EXAMPLE Indexing sample
+
+To build invertered index for a set of points you should run "indexer_launcher" application with some command line parameters.
+
+\code
+--threads_count            - number of threads for multi-threaded indexing
+--multiplicity             - number groups of dimensions points will be splitted to. Usually equals 2 or 4
+--points_file              - path to file with points database (should be in .bvecs or .fvecs format)
+--coarse_vocabs_file       - path to file with coarse vocabs (format description)
+--fine_vocabs_file         - path to file with fine vocabs for reranking(format description)
+--input_point_type         - "BVEC" or "FVEC"
+--points_count             - number of points to index
+--space_dim                - number of dimensions in point
+--files_prefix             - common prefix of future multiindex files
+--coarse_quantization_file - path to file with coarse quantizations
+--metainfo_file            - path to file with metainformation (deprecated, just write "fake.txt")
+--use_residuals            - reranking method flag (specify it if you want to use residuals for reranking and miss it if you want to use initial points)
+--build_coarse             - this flag indicate whether indexing algorithm should calculate points coarse quantizations
+\endcode
+
+Windows users can try launch_indexer.bat script. It launches indexing of 1000000 provided points with provided vocabs.
+Unix users should just write a similar launch_indexer.sh script.
+**/

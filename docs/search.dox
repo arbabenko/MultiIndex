@@ -1,0 +1,53 @@
+/** \page Search How to search
+
+\tableofcontents
+
+\section ALGO Algorithm
+
+Search algorithm traverses inverted multiindex structure by order descibed in <a href=http://download.yandex.ru/company/cvpr2012.pdf>paper</a>. \n
+It accumulates traversed points and stops when their count reaches the value defined by the user.\n
+If rerank mode is on (flag --do_rerank is specified) method also calculates estimation of distance to query for every traversed point. Then all traversed points are sorted by increasing of this estimation.\n
+
+For search you should provide coarse vocabularies and fine vocabularies used for indexing. Besides you should provide file with queries and groundtruth for testing quality.\n
+
+\section FORMATS File formats
+
+- <b>Queries</b> \n
+Our code assumes that queries are in <a href=http://corpus-texmex.irisa.fr>.bvecs</a> or <a href=http://corpus-texmex.irisa.fr>.bvecs</a> format.\n
+- <b>Groundtruth</b> \n
+Our code assumes that groundtruth are in <a href=http://corpus-texmex.irisa.fr>.ivecs</a> format.\n
+- <b>Coarse vocabularies</b>\n
+Our code assumes that coarse vocabularies are in the next format:\n
+4 bytes(one int32) - number of items in each vocabulary (N)\n
+4 bytes(one int32) - dimension of item (d)\n
+4*N*d*M bytes(N*d*M floats) - vocabulary items one after another (M is the multiplicity of algorithm)\n
+- <b>Fine vocabularies</b>\n
+Our code assumes that fine vocabularies are in the next format:\n
+4 bytes(one int32) - number of vocabularies (m)\n
+4 bytes(one int32) - number of items in each vocabulary (N)\n
+4 bytes(one int32) - dimension of item (d)\n
+4*N*d*m bytes(N*d*m floats) - vocabulary items one after another\n
+
+\section EXAMPLE Search sample
+
+To launch search and get quality of search algorithm you should run "searcher_tester" application with some command line parameters.
+\code
+--coarse_vocabs_file        - path to file with coarse vocabs (format description)
+--fine_vocabs_file          - path to file with fine vocabs for reranking(format description)
+--query_point_type          - "BVEC" or "FVEC"
+--use_residuals             - reranking method flag (specify it if you want to use residuals for reranking and miss it if you want to use initial points)
+--space_dim                 - number of dimensions in point
+--subspaces_centroids_count - number of nearest vocabulary items to consider
+--index_files_prefix        - common prefix of multiindex files
+--queries_file              - path to file with queries (should be in .bvecs or .fvecs format)
+--groundtruth_file          - path to file with groundtruth (should be in .ivecs format)
+--queries_count             - number of queries to search
+--neighbours_count          - number of neighbours involved in reranking
+--report_file               - path to file with search quality report
+--do_rerank                 - this flag indicate whether search algorithm should rerank points based on distance to query estimation
+\endcode
+
+Windows users can try test_searcher.bat script. It launches search in index builded by launch_indexer.bat script.
+Unix users should just write a similar test_searcher.sh script.
+
+**/

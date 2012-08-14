@@ -1,0 +1,13 @@
+
+/** @mainpage MultiIndex
+
+This is a brief explanation to sources of <a href=http://download.yandex.ru/company/cvpr2012.pdf>inverted multiindex algorithm</a>
+for fast approximate search of nearest neighbours in highdimensional spaces.  
+
+  - \ref HowToInstall
+  
+  - \ref Indexation
+  
+  - \ref Search
+ 
+**/

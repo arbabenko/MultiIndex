@@ -1,0 +1,102 @@
+/** \page HowToInstall How to install
+
+\tableofcontents
+	
+\section SOFT Install third-part software
+
+To use our code you should install some third-part software
+
+- CMake <a href=http://www.cmake.org/cmake/resources/software.html>www.cmake.org/cmake/resources/software.html</a>
+- Boost <a href=http://www.boost.org>www.boost.org</a>
+- IntelMKL <a href=http://software.intel.com/en-us/articles/intel-mkl/>software.intel.com/en-us/articles/intel-mkl/</a>
+
+\section CMAKE Correct CMakeLists.txt file
+
+You should insert path to Boost and BLAS sources and libraries in file CMakeLists.txt.
+
+\code
+##########################################################################################
+# CMake build script for MultiIndex
+#
+##########################################################################################
+
+#let all libraries be static, not shared
+OPTION(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+
+##########################################################################################
+# lets start describing our project.
+project (NearestSearch CXX C)
+cmake_minimum_required(VERSION 2.6)
+
+IF (UNIX)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+ENDIF (UNIX)
+
+IF (NOT DEFINED CMAKE_CURRENT_LIST_DIR)
+    SET(CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF (NOT DEFINED CMAKE_CURRENT_LIST_DIR)
+
+MESSAGE("current dir: ${CMAKE_CURRENT_LIST_DIR}")
+SET (Source_Path ${CMAKE_CURRENT_LIST_DIR})
+
+MESSAGE ("PROJECT_BINARY_DIR " ${PROJECT_BINARY_DIR})
+
+# ADD BOOSTDIR
+SET(BOOST_DIR <INSERT HERE THE PATH TO BOOST SOURCES>)
+SET(BOOST_LIB <INSERT HERE THE PATH TO BOOST LIBS>)
+
+# ADD BLAS
+SET(BLAS_DIR <INSERT HERE THE PATH TO MKL SOURCES>)
+SET(BLAS_LIB <INSERT HERE THE PATH TO MKL LIBS>)
+
+SET(REQUIRED_BLAS_LIBS mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib)
+
+##########################################################################################
+INCLUDE (${Source_Path}/NearestSearch.cmake NO_POLICY_SCOPE)
+INCLUDE_DIRECTORIES(${BOOST_DIR})
+INCLUDE_DIRECTORIES(${BLAS_DIR})
+LINK_DIRECTORIES(${BOOST_LIB})
+LINK_DIRECTORIES(${BLAS_LIB})
+INCLUDE_DIRECTORIES(${Source_Path})
+ADD_LIBRARY (nearest_search_lib STATIC ${NEAREST_ALL_CC})
+
+##########################################################################################
+INCLUDE (${Source_Path}/IndexerLauncher.cmake NO_POLICY_SCOPE)
+INCLUDE_DIRECTORIES(${BOOST_DIR})
+INCLUDE_DIRECTORIES(${BLAS_DIR})
+LINK_DIRECTORIES(${BOOST_LIB})
+LINK_DIRECTORIES(${BLAS_LIB})
+INCLUDE_DIRECTORIES(${Source_Path})
+ADD_EXECUTABLE (indexer_launcher ${IndexerLauncher})
+TARGET_LINK_LIBRARIES (indexer_launcher nearest_search_lib)
+TARGET_LINK_LIBRARIES (indexer_launcher  ${REQUIRED_BLAS_LIBS})
+  
+##########################################################################################
+INCLUDE (${Source_Path}/SearcherTester.cmake NO_POLICY_SCOPE)
+INCLUDE_DIRECTORIES(${BOOST_DIR})
+INCLUDE_DIRECTORIES(${BLAS_DIR})
+LINK_DIRECTORIES(${BOOST_LIB})
+LINK_DIRECTORIES(${BLAS_LIB})
+INCLUDE_DIRECTORIES(${Source_Path})
+ADD_EXECUTABLE (searcher_tester ${SearchTester})
+TARGET_LINK_LIBRARIES (searcher_tester nearest_search_lib)
+TARGET_LINK_LIBRARIES (searcher_tester ${REQUIRED_BLAS_LIBS})
+\endcode
+
+The list of libraries to link (${REQUIRED_BLAS_LIBS}) may differ from the above.
+You can get the list for your architecture <a href=http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/>here</a>. 
+
+\section BUILD Build project
+
+- create folder "build" in directory with source files
+- (for Windows users) run "make_project.bat"
+- (for Unix users) do next steps
+\code
+cd build
+cmake ..
+\endcode 
+
+These operations create Solution for VisualStudio (Windows) or makefile (Unix). Then you can build the project.
+
+**/
