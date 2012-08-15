@@ -1,29 +1,29 @@
-/** \page Indexation How to index
+/** \page Indexation How to create a multi-index
 
 \tableofcontents
 
 \section ALGO Algorithm
 
-The idea of indexing algorithm is described in our <a href=http://download.yandex.ru/company/cvpr2012.pdf>paper</a>, we write only details of implementation here.\n
+The process of the multi-index construction is described in our <a href=http://download.yandex.ru/company/cvpr2012.pdf>paper</a>. Here we provide the details of the implementation.\n
 \n
-Indexing consists of two stages: points space subdividing and calculating information for reranking. Because one can use different reranking approaches for the same space subdividing, after first stage algorithm saves on the HDD "coarse quantizations" for all points in the database. Coarse quantizations are just the identifiers of vocabulary items for all groups of dimensions. So if you already have file with coarse quantizations there is no need to calculate them again (miss the flag "--build_coarse" in command line parameters).\n
+After the vocabularies are trained (see below), the index construction progress in two stages: assigning points to multi-index entries ("coarse quantization") and calculating information for reranking. Because one can use different reranking approaches for the same coarse quantization, the first stage of the algorithm saves the coarse quantizations for all points in the database to hard drive. These coarse quantizations are just the entry identifiers (e.g. codeword pairs). So if the file with coarse quantizations has already been produced there is no need to calculate them again (in this case, remove the flag "--build_coarse" from the command line parameters).\n
 \n
-MultiIndex consists of long onedimensional array and table with edges of clusters in this array.
-MultiIndexer is a C++ template by the type of the record in this array. So you can easy implement your own reranking approach by defining new structure NewRecordType and implementing function GetRecord<NewRecordType> for your structure.\n
+In the CPU, a multi-index consists of a long onedimensional array containing the compressed points aligned by entries (i.e. a group of points belonging to the same entry is stored contiguously) and a table containing the starting index in the array for every entry of the multi-index.
+The class MultiIndexer is thus a C++ template by the type of the record in this array. In this way, you can easy implement your own reranking approach by defining new structure NewRecordType and implementing function GetRecord<NewRecordType> for your structure.\n
 \n
-For indexing you should provide coarse vocabularies to build multiindex structure and fine vocabularies to calculate reranking information. We assume that these files are prepared outside this code (C++ is not the simplest way to create vocabularies).\n
+For index contstruction you should provide coarse vocabularies for building the multi-index structure and fine vocabularies for calculating the reranking information (assuming that you are using the provided reranking procedure). We assume that these files are prepared outside this code (C++ is not the simplest way to create vocabularies, just for your reference we provide a MATLAB-script to create them below).\n
 
 \section FORMATS File formats
 
-- <b>Database</b> \n
-Our code can handle only databases in <a href=http://corpus-texmex.irisa.fr>.bvecs</a> or <a href=http://corpus-texmex.irisa.fr>.fvecs</a> format.\n
+Our code uses the <a href=http://corpus-texmex.irisa.fr>.bvecs</a> and  <a href=http://corpus-texmex.irisa.fr>.fvecs</a> file formats developed by INRIA LEAR and TEXMEX groups.
+
 - <b>Coarse vocabularies</b>\n
-Our code assumes that coarse vocabularies are in the next format:\n
+Our code assumes that coarse vocabularies are in the following format:\n
 4 bytes(one int32) - number of items in each vocabulary (N)\n
 4 bytes(one int32) - dimension of item (d)\n
 4*N*d*M bytes(N*d*M floats) - vocabulary items one after another (M is the multiplicity of algorithm)\n
 \n
-Matlab script to build vocabularies
+Matlab script to build coarse vocabularies
 \code
 clear all;
 
@@ -32,8 +32,8 @@ all_data = bvecs_read('sift1M.bvecs');
 all_data = single(all_data);
 vocabSize = 4096;
 % add implementation of K-means
-vocab1 = kmeans(single(all_data(1:end/2,:)),vocabSize);
-vocab2 = kmeans(single(all_data(end/2+1:end,:)),vocabSize);
+vocab1 = your_kmeans(single(all_data(1:end/2,:)),vocabSize);
+vocab2 = your_kmeans(single(all_data(end/2+1:end,:)),vocabSize);
 
 file = fopen(['sift1M_4096_double_' num2str(vocabSize) '.dat'], 'w');
 dim = size(vocab1, 1);
@@ -46,15 +46,17 @@ fclose(file);
 save(['sift1M_4096_double_' num2str(vocabSize) '.mat'], 'vocab1', 'vocab2');
 \endcode
 - <b>Fine vocabularies</b>\n
-Our code assumes that fine vocabularies are in the next format:\n
+Our code assumes that fine vocabularies are in the following format:\n
 4 bytes(one int32) - number of vocabularies (m)\n
 4 bytes(one int32) - number of items in each vocabulary (N)\n
 4 bytes(one int32) - dimension of item (d)\n
 4*N*d*m bytes(N*d*m floats) - vocabulary items one after another\n
 
+TODO: add another matlab script
+
 \section EXAMPLE Indexing sample
 
-To build invertered index for a set of points you should run "indexer_launcher" application with some command line parameters.
+To build an invertered index for a set of points you should run "indexer_launcher" application with some command line parameters.
 
 \code
 --threads_count            - number of threads for multi-threaded indexing
@@ -72,6 +74,6 @@ To build invertered index for a set of points you should run "indexer_launcher" 
 --build_coarse             - this flag indicate whether indexing algorithm should calculate points coarse quantizations
 \endcode
 
-Windows users can try launch_indexer.bat script. It launches indexing of 1000000 provided points with provided vocabs.
+Windows users can try launch_indexer.bat script. It launches indexing of the 1000000 provided points (TODO!!!) using the provided vocabularies.
 Unix users should just write a similar launch_indexer.sh script.
 **/
