@@ -35,7 +35,7 @@ To launch the search for all queries and to estimate the accuracy of the search 
 --coarse_vocabs_file        - the path to the file with coarse vocabs (see the format description above)
 --fine_vocabs_file          - the path to the file with fine vocabs for reranking(see the format description above)
 --query_point_type          - "BVEC" or "FVEC"
---use_residuals             - the reranking method flag. Add it if you are using the residuals for reranking (Multi-D-ADC) and do not add it if you are using the initial vector (Multi-ADC)
+--use_residuals             - the reranking method flag. Specify it if you are using the residuals for reranking (Multi-D-ADC) and omit it if you are using the initial vector (Multi-ADC)
 --space_dim                 - space dimensionality (e.g. 128 for SIFTs)
 --subspaces_centroids_count - the number of nearest vocabulary items to consider (L in the paper)
 --index_files_prefix        - the common prefix of the multi-index files (to control runs with different parameters)
