@@ -59,19 +59,19 @@ TODO: add another matlab script
 To build an invertered index for a set of points you should run "indexer_launcher" application with some command line parameters.
 
 \code
---threads_count            - number of threads for multi-threaded indexing
---multiplicity             - number groups of dimensions points will be splitted to. Usually equals 2 or 4
---points_file              - path to file with points database (should be in .bvecs or .fvecs format)
---coarse_vocabs_file       - path to file with coarse vocabs (format description)
---fine_vocabs_file         - path to file with fine vocabs for reranking(format description)
+--threads_count            - the number of threads to use for the multi-threaded index construction
+--multiplicity             - the number of groups of dimensions the vectors will be split into. Equals 2 or 4 for the experiments in the paper.
+--points_file              - the path to the file with the vector database (should be in .bvecs or .fvecs format)
+--coarse_vocabs_file       - the path to the file with the coarse vocabularies (see the format description above)
+--fine_vocabs_file         - the path to the file with fine vocabularies for reranking (see the format description above)
 --input_point_type         - "BVEC" or "FVEC"
---points_count             - number of points to index
---space_dim                - number of dimensions in point
---files_prefix             - common prefix of future multiindex files
---coarse_quantization_file - path to file with coarse quantizations
---metainfo_file            - path to file with metainformation (deprecated, just write "fake.txt")
---use_residuals            - reranking method flag (specify it if you want to use residuals for reranking and miss it if you want to use initial points)
---build_coarse             - this flag indicate whether indexing algorithm should calculate points coarse quantizations
+--points_count             - the number of points to index
+--space_dim                - the space dimensionality (e.g. 128 for SIFTs)
+--files_prefix             - the common prefix for storing the multi-index files (used to control runs with different parameters)
+--coarse_quantization_file - the path to the file with coarse quantizations
+--metainfo_file            - the path to the file with metainformation (deprecated, just write "fake.txt")
+--use_residuals            - the reranking method flag. Specify it if you want to use residuals for reranking (Multi-D-ADC) and omit it if you want to use initial points (Multi-ADC)
+--build_coarse             - specify this flag if you want to recompute coarse quantizations (otherwise, will use the previously computed, if available)
 \endcode
 
 Windows users can try launch_indexer.bat script. It launches indexing of the 1000000 provided points (TODO!!!) using the provided vocabularies.
