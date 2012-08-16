@@ -150,7 +150,8 @@ File formats</h1>
 <div class="line">dist = cell(bytes_per_point,1);</div>
 <div class="line"><span class="keywordflow">for</span> m = 1:bytes_per_point</div>
 <div class="line">    chunk = residual(D*m-D+1:D*m,:);</div>
-<div class="line">    residual_vocab{m} = annkmeans(chunk,256);</div>
+<div class="line">        % add implementation of K-means</div>
+<div class="line">    residual_vocab{m} = your_kmeans(chunk,256);</div>
 <div class="line">    dist{m} = vl_alldist2(residual_vocab{m});          </div>
 <div class="line">end</div>
 <div class="line"></div>
@@ -190,7 +191,7 @@ Search sample</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Aug 16 2012 17:27:26 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Aug 16 2012 17:51:53 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>
