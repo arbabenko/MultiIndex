@@ -72,7 +72,8 @@ residual_vocab = cell(bytes_per_point,1);
 dist = cell(bytes_per_point,1);
 for m = 1:bytes_per_point
     chunk = residual(D*m-D+1:D*m,:);
-    residual_vocab{m} = annkmeans(chunk,256);
+	% add implementation of K-means
+    residual_vocab{m} = your_kmeans(chunk,256);
     dist{m} = vl_alldist2(residual_vocab{m});          
 end
 
