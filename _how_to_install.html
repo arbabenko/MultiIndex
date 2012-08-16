@@ -89,11 +89,11 @@ Install third-part software</h1>
 <ul>
 <li>CMake <a href="http://www.cmake.org/cmake/resources/software.html">www.cmake.org/cmake/resources/software.html</a></li>
 <li>Boost <a href="http://www.boost.org">www.boost.org</a></li>
-<li>IntelMKL <a href="http://software.intel.com/en-us/articles/intel-mkl/">software.intel.com/en-us/articles/intel-mkl/</a></li>
+<li>IntelMKL <a href="http://software.intel.com/en-us/articles/intel-mkl/">software.intel.com/en-us/articles/intel-mkl/</a> - implementation of BLAS</li>
 </ul>
 <h1><a class="anchor" id="CMAKE"></a>
 Correct CMakeLists.txt file</h1>
-<p>You should insert path to Boost and BLAS sources and libraries in file CMakeLists.txt.</p>
+<p>You should insert path to Boost and BLAS (MKL) sources and libraries in file CMakeLists.txt.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">##########################################################################################</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor"># CMake build script for MultiIndex</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor">#</span></div>
@@ -175,7 +175,7 @@ Build project</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Aug 16 2012 15:28:07 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Aug 16 2012 17:27:26 for MultiIndex by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>
