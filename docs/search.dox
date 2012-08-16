@@ -30,7 +30,7 @@ Our code assumes that fine vocabularies are in the following format:\n
 
 \section EXAMPLE Search sample
 
-To launch the search for all queries and to estimate the accuracy of the search algorithm run the "searcher_tester" script. The following command-line options control the execution:
+To launch the search for all queries and to estimate the accuracy of the search algorithm run the "searcher_tester" application. The following command-line options control the execution:
 \code
 --coarse_vocabs_file        - the path to the file with coarse vocabs (see the format description above)
 --fine_vocabs_file          - the path to the file with fine vocabs for reranking(see the format description above)
