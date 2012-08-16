@@ -8,11 +8,11 @@ To use our code you should install some third-part software
 
 - CMake <a href=http://www.cmake.org/cmake/resources/software.html>www.cmake.org/cmake/resources/software.html</a>
 - Boost <a href=http://www.boost.org>www.boost.org</a>
-- IntelMKL <a href=http://software.intel.com/en-us/articles/intel-mkl/>software.intel.com/en-us/articles/intel-mkl/</a>
+- IntelMKL <a href=http://software.intel.com/en-us/articles/intel-mkl/>software.intel.com/en-us/articles/intel-mkl/</a> - implementation of BLAS
 
 \section CMAKE Correct CMakeLists.txt file
 
-You should insert path to Boost and BLAS sources and libraries in file CMakeLists.txt.
+You should insert path to Boost and BLAS (MKL) sources and libraries in file CMakeLists.txt.
 
 \code
 ##########################################################################################
