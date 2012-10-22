@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['multiindex',['MultiIndex',['../index.html',1,'']]],
   ['main',['main',['../indexer__launcher_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627',1,'main(int argc, char **argv):&#160;indexer_launcher.cpp'],['../searcher__tester_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627',1,'main(int argc, char **argv):&#160;searcher_tester.cpp']]],
   ['main_5fpage_2edox',['main_page.dox',['../main__page_8dox.html',1,'']]],
   ['mergeditemindices',['MergedItemIndices',['../ordered__lists__merger_8h.html#a60cee351eb79cf58609c56f14a8ce3af',1,'ordered_lists_merger.h']]],
@@ -16,6 +15,6 @@ var searchData=
   ['multisearcher',['MultiSearcher',['../class_multi_searcher.html',1,'MultiSearcher&lt; Record, MetaInfo &gt;'],['../class_multi_searcher.html#a6705a0fb0da35310466290ca3c777486',1,'MultiSearcher::MultiSearcher()']]],
   ['multitable',['Multitable',['../struct_multitable.html',1,'Multitable&lt; T &gt;'],['../struct_multitable.html#a648635783d2f3343780673ae124a6118',1,'Multitable::Multitable()']]],
   ['multitable_2ehpp',['multitable.hpp',['../multitable_8hpp.html',1,'']]],
-  ['multitable_3c_20char_20_3e',['Multitable&lt; char &gt;',['../struct_multitable.html',1,'']]],
-  ['multitable_3c_20int_20_3e',['Multitable&lt; int &gt;',['../struct_multitable.html',1,'']]]
+  ['multitable_3c_20char_20_3e',['Multitable< char >',['../struct_multitable.html',1,'']]],
+  ['multitable_3c_20int_20_3e',['Multitable< int >',['../struct_multitable.html',1,'']]]
 ];
