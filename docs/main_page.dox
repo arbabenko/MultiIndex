@@ -1,7 +1,7 @@
 /** @mainpage MultiIndex
 
 This is a brief documentation for the source code of the <a href=http://download.yandex.ru/company/cvpr2012.pdf>inverted multiindex algorithm</a>
-for fast and memory-efficient indexing and approximate nearest-neighbor search in high-dimensional spaces.  
+for fast and memory-efficient indexing and approximate nearest-neighbor search in high-dimensional spaces. <b>One can download source-code from <a href=https://github.com/arbabenko/MultiIndex>here</a>.</b>
 
   - \ref HowToInstall
   
