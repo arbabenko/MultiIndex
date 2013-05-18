@@ -59,6 +59,10 @@ int points_count;
  * Multiplicity of multiindex
  */
 int multiplicity;
+/**
+ * Number of components for one subspace
+ */
+int pca_num;
 
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
@@ -75,6 +79,7 @@ int SetOptions(int argc, char** argv) {
     ("points_count,p", value<int>())
     ("coarse_quantization_file,q", value<string>())
     ("space_dim,d", value<int>())
+    ("pca_num,u", value<int>())
     ("files_prefix,_", value<string>());
   variables_map name_to_value;
   try {
@@ -107,6 +112,7 @@ int SetOptions(int argc, char** argv) {
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   files_prefix =               name_to_value["files_prefix"].as<string>();
   points_count =               name_to_value["points_count"].as<int>();
+  pca_num =                    name_to_value["pca_num"].as<int>();
  
   build_coarse_quantizations = (name_to_value["build_coarse"].as<bool>() == true) ? true : false;
   mode = name_to_value["use_residuals"].as<bool>() == true ? USE_RESIDUALS : USE_INIT_POINTS;

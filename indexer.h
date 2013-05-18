@@ -402,6 +402,21 @@ void MultiIndexer<Record>::GetPointCoarseQuantization(const PointId pid,
   }
 }
 
+float* PCA_matrix1;
+float* PCA_matrix2;
+extern int pca_num;
+
+void ReadMatrix(float** matrix, const std::string& filename) {
+  std::ifstream input;
+  input.open(filename.c_str(), ios::in | ios::binary);
+  *matrix = new float[64*64];
+  for(int i = 0; i < 64; ++i) {
+    for(int j = 0; j < 64; ++j) {
+        input.read((char*)(*matrix + i * 64 + j), sizeof(float));
+    }
+  }
+}
+
 template<class Record>
 void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename,
                                                    const PointId start_pid,
@@ -421,7 +436,18 @@ void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename
       cout << "Filling multiindex, point # " << start_pid + point_number << endl;
     }
   Point current_point;
-  ReadPoint(point_stream, &current_point);
+	ReadPoint(point_stream, &current_point);
+  Point pca_point(multiplicity_ * pca_num);
+  Point tmp_point(current_point.size());
+	cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+              PCA_matrix1, 64, &(current_point[0]), 1, 0, &(tmp_point[0]), 1);
+	cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+              PCA_matrix2, 64, &(current_point[64]), 1, 0, &(tmp_point[64]), 1);
+  for(int i = 0; i < pca_num; ++i) {
+      pca_point[i] = tmp_point[i];
+      pca_point[pca_num + i] = tmp_point[64 + i];
+  }
+  current_point = pca_point;
   vector<ClusterId> coarse_quantization(multiplicity_);
   GetPointCoarseQuantization(start_pid + point_number,
                              coarse_quantization_filename_,
@@ -499,6 +525,8 @@ void MultiIndexer<Record>::BuildMultiIndex(const string& points_filename,
                                            const string& coarse_quantization_filename) {
   InitParameters<Record>(fine_vocabs, mode, metainfo_filename);
   InitBlasStructures(coarse_vocabs);
+  ReadMatrix(&PCA_matrix1, "../matrix1.dat");
+  ReadMatrix(&PCA_matrix2, "../matrix2.dat");
   files_prefix_ = files_prefix;
   coarse_quantization_filename_ = coarse_quantization_filename;
   if(build_coarse_quantization) {
