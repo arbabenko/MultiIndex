@@ -260,6 +260,7 @@ void MultiSearcher<Record, MetaInfo>::GetNearestSubspacesCentroids(const Point& 
                                                                    const int subspace_centroins_count,
                                                                    vector<NearestSubspaceCentroids>*
                                                                    subspaces_short_lists) const {
+  std::stringstream aa;
   subspaces_short_lists->resize(coarse_vocabs_.size());
   Dimensions subspace_dimension = point.size() / coarse_vocabs_.size();
   for(int subspace_index = 0; subspace_index < coarse_vocabs_.size(); ++subspace_index) {
@@ -318,7 +319,7 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   if(cell_start >= cell_finish) {
     return true;
   }
-  vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
+  typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
   GetResidual(point, cell_coordinates, coarse_vocabs_, residual_);
   cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
@@ -342,6 +343,7 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
 template<class Record, class MetaInfo>
 void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
+  assert(k > 0);
   perf_tester_.handled_queries_count += 1;
   neighbours->resize(k);
   perf_tester_.ResetQuerywiseStatistic();
@@ -349,6 +351,7 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, i
   perf_tester_.search_start = start;
   clock_t before = clock();
   vector<NearestSubspaceCentroids> subspaces_short_lists;
+  assert(subspace_centroids_to_consider_ > 0);
   GetNearestSubspacesCentroids(point, subspace_centroids_to_consider_, &subspaces_short_lists);
   clock_t after = clock();
   perf_tester_.nearest_subcentroids_time += after - before;

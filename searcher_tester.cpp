@@ -1,7 +1,7 @@
 // Copyright 2012 Yandex Artem Babenko
 #include <iostream>
 
-#include <boost\program_options.hpp>
+#include <boost/program_options.hpp>
 
 #include <mkl.h>
 
@@ -136,9 +136,10 @@ void TestSearcher(TSearcher& searcher,
   cout << "Searcher inited ...\n";
   vector<double> recalls(5, 0.0);
   vector<DistanceToPoint> result;
-  for(int i = 0; i < 1; ++i) {
+  for(int k = 0; k < 1; ++k) {
     clock_t start = clock();
     for(int i = 0; i < queries_count; ++i) {
+      std::cout << i << std::endl;
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
       recalls[0] += GetRecallAt(1, groundtruth[i], result);
       recalls[1] += GetRecallAt(10, groundtruth[i], result);

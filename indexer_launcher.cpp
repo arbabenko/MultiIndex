@@ -1,7 +1,7 @@
 // Copyright 2012 Yandex Artem Babenko
 #include <iostream>
 
-#include <boost\program_options.hpp>
+#include <boost/program_options.hpp>
 
 #include "indexer.h"
 
