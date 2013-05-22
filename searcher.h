@@ -62,7 +62,7 @@ class MultiSearcher {
   * @param subpace_centroids_to_consider it defines the size of working index table
   * @param neighbours result - vector of point identifiers ordered by increasing of distance to query
   */
-  void GetNearestNeighbours(const Point& point, int k, 
+  void GetNearestNeighbours(Point& point, int k, 
                             vector<pair<Distance, MetaInfo> >* neighbours) const;
  /**
   * Returns searcher perfomance tester
@@ -260,7 +260,6 @@ void MultiSearcher<Record, MetaInfo>::GetNearestSubspacesCentroids(const Point& 
                                                                    const int subspace_centroins_count,
                                                                    vector<NearestSubspaceCentroids>*
                                                                    subspaces_short_lists) const {
-  std::stringstream aa;
   subspaces_short_lists->resize(coarse_vocabs_.size());
   Dimensions subspace_dimension = point.size() / coarse_vocabs_.size();
   for(int subspace_index = 0; subspace_index < coarse_vocabs_.size(); ++subspace_index) {
@@ -339,10 +338,39 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   return true;
 }
 
+float* PCA_matrix12;
+float* PCA_matrix22;
+
+void ReadMatrix2(float** matrix, const std::string& filename) {
+  std::ifstream input;
+  input.open(filename.c_str(), ios::in | ios::binary);
+  *matrix = new float[64*64];
+  for(int i = 0; i < 64; ++i) {
+    for(int j = 0; j < 64; ++j) {
+        input.read((char*)(*matrix + i * 64 + j), sizeof(float));
+    }
+  }
+}
+
 
 template<class Record, class MetaInfo>
-void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
+void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
+ // ReadMatrix2(&PCA_matrix12, "../matrix1.dat");
+ // ReadMatrix2(&PCA_matrix22, "../matrix2.dat");
+ // int pca_num = coarse_vocabs_[0][0].size();
+ // Point current_point = point;
+ // Point pca_point(2 * pca_num);
+ // Point tmp_point(current_point.size());
+	//cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+ //             PCA_matrix12, 64, &(current_point[0]), 1, 0, &(tmp_point[0]), 1);
+	//cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+ //             PCA_matrix22, 64, &(current_point[64]), 1, 0, &(tmp_point[64]), 1);
+ // for(int i = 0; i < pca_num; ++i) {
+ //     pca_point[i] = tmp_point[i];
+ //     pca_point[pca_num + i] = tmp_point[64 + i];
+ // }
+ // point = pca_point;
   assert(k > 0);
   perf_tester_.handled_queries_count += 1;
   neighbours->resize(k);
@@ -368,15 +396,14 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, i
     traverse_next_cell = TraverseNextMultiIndexCell(point, neighbours);
     cells_visited += 1;
   }
+  int real_neighbours_count = std::min(found_neghbours_count_, 10000);
+  neighbours->resize(real_neighbours_count);
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
   if(do_rerank_) {
-    if(neighbours->size() > 10000) {
-      std::nth_element(neighbours->begin(), neighbours->begin() + 10000, neighbours->end());
-      neighbours->resize(10000);
-    }
     std::sort(neighbours->begin(), neighbours->end());
   }
+  std::cout << neighbours->at(0).first << neighbours->at(1).first << neighbours->at(2).first << std::endl;
   clock_t finish = clock();
   perf_tester_.full_search_time += finish - start;
 }

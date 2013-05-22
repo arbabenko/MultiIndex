@@ -127,7 +127,7 @@ int SetOptions(int argc, char** argv) {
 
 template<class TSearcher>
 void TestSearcher(TSearcher& searcher,
-                  const Points& queries,
+                  Points& queries,
                   const vector<vector<PointId> >& groundtruth) {
   searcher.Init(index_files_prefix, coarse_vocabs_file,
                 fine_vocabs_file, mode,
@@ -141,6 +141,7 @@ void TestSearcher(TSearcher& searcher,
     for(int i = 0; i < queries_count; ++i) {
       std::cout << i << std::endl;
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
+      std::cout << result[0].second << " " <<  result[1].second << " " << groundtruth[i][0] << std::endl;
       recalls[0] += GetRecallAt(1, groundtruth[i], result);
       recalls[1] += GetRecallAt(10, groundtruth[i], result);
       recalls[2] += GetRecallAt(100, groundtruth[i], result);
