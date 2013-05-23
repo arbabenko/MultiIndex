@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
   cout << "Options are set ...\n";
   vector<Centroids> coarse_vocabs;
   vector<Centroids> fine_vocabs;
-  ReadVocabularies<float>(coarse_vocabs_file, SPACE_DIMENSION, &coarse_vocabs);
+  ReadVocabularies<float>(coarse_vocabs_file, 2*pca_num, &coarse_vocabs);
   ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
   cout << "Vocs are read ...\n";
   if(fine_vocabs.size() == 8) {

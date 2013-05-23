@@ -166,6 +166,16 @@ inline U Round(T number) {
   return (U)(number + 0.5);
 }
 
+template<>
+inline float Round(float number) {
+  return number;
+}
+
+template<>
+inline float Round(unsigned char number) {
+  return (float)number;
+}
+
 /**
  * Function reads point written in .fvecs or .bvecs format.
  * Input points have coordinates of type T.

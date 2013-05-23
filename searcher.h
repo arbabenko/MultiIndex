@@ -356,21 +356,6 @@ void ReadMatrix2(float** matrix, const std::string& filename) {
 template<class Record, class MetaInfo>
 void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
- // ReadMatrix2(&PCA_matrix12, "../matrix1.dat");
- // ReadMatrix2(&PCA_matrix22, "../matrix2.dat");
- // int pca_num = coarse_vocabs_[0][0].size();
- // Point current_point = point;
- // Point pca_point(2 * pca_num);
- // Point tmp_point(current_point.size());
-	//cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
- //             PCA_matrix12, 64, &(current_point[0]), 1, 0, &(tmp_point[0]), 1);
-	//cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
- //             PCA_matrix22, 64, &(current_point[64]), 1, 0, &(tmp_point[64]), 1);
- // for(int i = 0; i < pca_num; ++i) {
- //     pca_point[i] = tmp_point[i];
- //     pca_point[pca_num + i] = tmp_point[64 + i];
- // }
- // point = pca_point;
   assert(k > 0);
   perf_tester_.handled_queries_count += 1;
   neighbours->resize(k);

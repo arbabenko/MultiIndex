@@ -302,6 +302,33 @@ void MultiIndexer<Record>::SerializeMultiIndexFiles() {
   cout << "Finish multiindex serializing....\n";
 }
 
+float* PCA_matrix1;
+float* PCA_matrix2;
+float* ort_matrix1;
+float* ort_matrix2;
+float* mean;
+extern int pca_num;
+
+void ReadMatrix(float** matrix, const std::string& filename) {
+  std::ifstream input;
+  input.open(filename.c_str(), ios::in | ios::binary);
+  *matrix = new float[64*64];
+  for(int i = 0; i < 64; ++i) {
+    for(int j = 0; j < 64; ++j) {
+        input.read((char*)(*matrix + i * 64 + j), sizeof(float));
+    }
+  }
+}
+
+void ReadVector(float** vector, const std::string& filename) {
+  std::ifstream input;
+  input.open(filename.c_str(), ios::in | ios::binary);
+  *vector = new float[128];
+  for(int i = 0; i < 128; ++i) {
+        input.read((char*)(*vector + i), sizeof(float));
+  }
+}
+
 template<class Record>
 void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filename,
                                                            const int start_pid,
@@ -323,7 +350,19 @@ void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_
     }
     Point current_point;
     ReadPoint(point_stream, &current_point);
-    int subpoints_dimension = SPACE_DIMENSION / multiplicity_;
+    Point residual = current_point;
+    cblas_saxpy(current_point.size(), -1, mean, 1, &(residual[0]), 1);
+    Point tmp_point(current_point.size());
+    cblas_sgemv(CblasRowMajor, CblasTrans, 64, 64, 1,
+                PCA_matrix1, 64, &(residual[0]), 1, 0, &(tmp_point[0]), 1);
+    cblas_sgemv(CblasRowMajor, CblasTrans, 16, 16, 1,
+                ort_matrix1, 16, &(tmp_point[0]), 1, 0, &(current_point[0]), 1);
+    cblas_sgemv(CblasRowMajor, CblasTrans, 64, 64, 1,
+                PCA_matrix2, 64, &(residual[64]), 1, 0, &(tmp_point[64]), 1);
+    cblas_sgemv(CblasRowMajor, CblasTrans, 16, 16, 1,
+                ort_matrix2, 16, &(tmp_point[64]), 1, 0, &(current_point[16]), 1);
+    current_point.resize(32);
+    int subpoints_dimension = current_point.size() / multiplicity_;
     for(int coarse_index = 0; coarse_index < multiplicity_; ++coarse_index) {
       Dimensions start_dim = coarse_index * subpoints_dimension;
       Dimensions final_dim = start_dim + subpoints_dimension;
@@ -402,32 +441,6 @@ void MultiIndexer<Record>::GetPointCoarseQuantization(const PointId pid,
   }
 }
 
-float* PCA_matrix1;
-float* PCA_matrix2;
-float* ort_matrix1;
-float* ort_matrix2;
-float* mean;
-extern int pca_num;
-
-void ReadMatrix(float** matrix, const std::string& filename) {
-  std::ifstream input;
-  input.open(filename.c_str(), ios::in | ios::binary);
-  *matrix = new float[64*64];
-  for(int i = 0; i < 64; ++i) {
-    for(int j = 0; j < 64; ++j) {
-        input.read((char*)(*matrix + i * 64 + j), sizeof(float));
-    }
-  }
-}
-
-void ReadVector(float** vector, const std::string& filename) {
-  std::ifstream input;
-  input.open(filename.c_str(), ios::in | ios::binary);
-  *matrix = new float[128];
-  for(int i = 0; i < 128; ++i) {
-        input.read((char*)(*vector + i), sizeof(float));
-  }
-}
 
 template<class Record>
 void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename,
@@ -448,19 +461,18 @@ void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename
       cout << "Filling multiindex, point # " << start_pid + point_number << endl;
     }
   Point current_point;
-	ReadPoint(point_stream, &current_point);
+  ReadPoint(point_stream, &current_point);
   Point residual = current_point;
   cblas_saxpy(current_point.size(), -1, mean, 1, &(residual[0]), 1);
-  Point pca_point(multiplicity_ * pca_num);
   Point tmp_point(current_point.size());
-	cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+	cblas_sgemv(CblasRowMajor, CblasTrans, 64, 64, 1,
               PCA_matrix1, 64, &(residual[0]), 1, 0, &(tmp_point[0]), 1);
-  cblas_sgemv(CblasRowMajor, CblasNoTrans, 16, 16, 1,
+  cblas_sgemv(CblasRowMajor, CblasTrans, 16, 16, 1,
               ort_matrix1, 16, &(tmp_point[0]), 1, 0, &(current_point[0]), 1);
-	cblas_sgemv(CblasRowMajor, CblasNoTrans, 64, 64, 1,
+	cblas_sgemv(CblasRowMajor, CblasTrans, 64, 64, 1,
               PCA_matrix2, 64, &(residual[64]), 1, 0, &(tmp_point[64]), 1);
-  cblas_sgemv(CblasRowMajor, CblasNoTrans, 16, 16, 1,
-              ort_matrix1, 16, &(tmp_point[0]), 1, 0, &(current_point[16]), 1);
+  cblas_sgemv(CblasRowMajor, CblasTrans, 16, 16, 1,
+              ort_matrix2, 16, &(tmp_point[64]), 1, 0, &(current_point[16]), 1);
   current_point.resize(32);
   vector<ClusterId> coarse_quantization(multiplicity_);
   GetPointCoarseQuantization(start_pid + point_number,
