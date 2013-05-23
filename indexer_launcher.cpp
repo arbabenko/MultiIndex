@@ -60,6 +60,8 @@ int points_count;
  */
 int multiplicity;
 
+int pca_num;
+
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
   description.add_options()
@@ -75,6 +77,7 @@ int SetOptions(int argc, char** argv) {
     ("points_count,p", value<int>())
     ("coarse_quantization_file,q", value<string>())
     ("space_dim,d", value<int>())
+    ("pca_num,u", value<int>())
     ("files_prefix,_", value<string>());
   variables_map name_to_value;
   try {
@@ -107,6 +110,7 @@ int SetOptions(int argc, char** argv) {
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   files_prefix =               name_to_value["files_prefix"].as<string>();
   points_count =               name_to_value["points_count"].as<int>();
+  pca_num =                    name_to_value["pca_num"].as<int>();
  
   build_coarse_quantizations = (name_to_value["build_coarse"].as<bool>() == true) ? true : false;
   mode = name_to_value["use_residuals"].as<bool>() == true ? USE_RESIDUALS : USE_INIT_POINTS;
@@ -127,7 +131,7 @@ int main(int argc, char** argv) {
   cout << "Options are set ...\n";
   vector<Centroids> coarse_vocabs;
   vector<Centroids> fine_vocabs;
-  ReadVocabularies<float>(coarse_vocabs_file, SPACE_DIMENSION, &coarse_vocabs);
+  ReadVocabularies<float>(coarse_vocabs_file, 2*pca_num, &coarse_vocabs);
   ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
   cout << "Vocs are read ...\n";
   if(fine_vocabs.size() == 8) {
