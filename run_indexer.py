@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_pca_smart'
+build_folder = './build_master'
 
 # number of threads to use (max = 32)
 threads_count = 32
@@ -23,7 +23,7 @@ input_type = 'BVEC'
 points_file = 'bigann_base.bvecs'
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1B_PCA32_smart'
+prefix = 'sift1B'
 
 # input points count
 points_count = 100000
@@ -43,11 +43,8 @@ use_residuals = 1
 # should we calculate coarse quantizations?
 build_coarse = 1
 
-# pca components to use in each subdimension
-pca_num = 16
-
 # postfix added by users to all multiindex files
-user_added_postfix = '_test'
+user_added_postfix = 'test'
 
 ##################################################
 
@@ -65,7 +62,7 @@ filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocab
 coarse_quantization_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + user_added_postfix + '_coarse_quantizations.bin'
 
 launch_time = datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
-os.system('mkdir -p ' + build_folder + '/' + launch_time + '_indexer')
+os.system('mkdir -p ' + build_folder + '/' + launch_time)
 os.system('cp ' + build_folder + '/indexer_launcher ' + build_folder + '/' + launch_time)
 os.system('cp run_indexer.py ' + build_folder + '/' + launch_time)
 
@@ -85,7 +82,6 @@ if use_residuals:
     launch_line = launch_line + '--use_residuals' + ' '
 if build_coarse:
     launch_line = launch_line + '--build_coarse' + ' '
-launch_line = launch_line + '--pca_num=' + str(pca_num) + ' '
 
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)

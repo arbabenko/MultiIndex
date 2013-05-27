@@ -5,23 +5,23 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_pca_smart'
+build_folder = './build_master'
 
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'
 
 # input query point type (BVEC or FVEC)
-query_input_type = 'FVEC'
+query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1B_PCA32_smart'
+prefix = 'sift1B'
 
 # dimension of input space
-space_dim = 32
+space_dim = 128
 
 # coarse vocabs size
 coarse_vocabs_size = 16384
@@ -36,7 +36,7 @@ use_residuals = 1
 subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'sift1B_PCA32_smart_queries.fvecs'
+queries_file = 'sift1B_queries.bvecs'
 
 # groundtruth file
 gnd_file = 'idx_1000M.ivecs'
@@ -51,7 +51,7 @@ neighbors_count = 10000
 do_rerank = 1
 
 # postfix added by users to all multiindex files
-user_added_postfix = '_test'
+user_added_postfix = 'test'
 
 ##################################################
 
