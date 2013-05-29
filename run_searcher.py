@@ -15,16 +15,16 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 2
+multiplicity = 4
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1B'
+prefix = 'gist80K'
 
 # dimension of input space
-space_dim = 128
+space_dim = 384
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 128
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -33,25 +33,25 @@ fine_vocabs_count = 8
 use_residuals = 1
 
 # number of centroids handled in each subdimension
-subspace_centroids_count = 1024
+subspace_centroids_count = 32
 
 # queries file
-queries_file = 'sift1B_queries.bvecs'
+queries_file = 'gist80K_queries.bvecs'
 
 # groundtruth file
-gnd_file = 'idx_1000M.ivecs'
+gnd_file = 'gist80K_groundtruth.ivecs'
 
 # number of queries
-queries_count = 3
+queries_count = 101
 
 # number of neighbors to seek
-neighbors_count = 10000
+neighbors_count = 8000
 
 # should we rerank ?
 do_rerank = 1
 
 # postfix added by users to all multiindex files
-user_added_postfix = 'test'
+user_added_postfix = ''
 
 ##################################################
 
@@ -93,4 +93,5 @@ if do_rerank:
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
 f.close()
-os.system(launch_line) 
+os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/log.txt' + ' &')
+print 'Log file: ' + build_folder + '/' + launch_time + '/log.txt' 

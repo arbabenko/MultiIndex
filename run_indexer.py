@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import datetime
+import sys
 
 ############# launch configuration #################
 
@@ -11,7 +12,7 @@ build_folder = './build_master'
 threads_count = 32
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 2
+multiplicity = 4
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'
@@ -20,22 +21,22 @@ bigann_root = '/sata/ResearchData/BigAnn'
 input_type = 'BVEC'
 
 # file with input point (.bvecs or .fvecs)
-points_file = 'bigann_base.bvecs'
+points_file = 'gist80K.bvecs'
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1B'
+prefix = 'gist80K'
 
 # input points count
-points_count = 100000
+points_count = 79301916
 
 # dimension of input space
-space_dim = 128
+space_dim = 384
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 128
 
 # fine vocabs count
-fine_vocabs_count = 8
+fine_vocabs_count = 16
 
 # should we use residuals?
 use_residuals = 1
@@ -44,7 +45,7 @@ use_residuals = 1
 build_coarse = 1
 
 # postfix added by users to all multiindex files
-user_added_postfix = 'test'
+user_added_postfix = ''
 
 ##################################################
 
@@ -86,4 +87,5 @@ if build_coarse:
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
 f.close()
-os.system(launch_line)
+os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/log.txt' + ' &')
+print 'Log file: ' + build_folder + '/' + launch_time + '/log.txt'
