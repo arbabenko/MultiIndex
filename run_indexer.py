@@ -21,13 +21,13 @@ bigann_root = '/sata/ResearchData/BigAnn'
 input_type = 'BVEC'
 
 # file with input point (.bvecs or .fvecs)
-points_file = 'gist80K.bvecs'
+points_file = 'gist80K_copy.bvecs'
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'gist80K'
+prefix = 'gist80K_copy'
 
 # input points count
-points_count = 79301916
+points_count = 157 * 18 + 79301916
 
 # dimension of input space
 space_dim = 384
@@ -36,13 +36,13 @@ space_dim = 384
 coarse_vocabs_size = 128
 
 # fine vocabs count
-fine_vocabs_count = 16
+fine_vocabs_count = 8
 
 # should we use residuals?
 use_residuals = 1
 
 # should we calculate coarse quantizations?
-build_coarse = 1
+build_coarse = 0
 
 # postfix added by users to all multiindex files
 user_added_postfix = ''

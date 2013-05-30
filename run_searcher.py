@@ -15,16 +15,16 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 4
+multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'gist80K'
+prefix = 'gist80K_copy'
 
 # dimension of input space
 space_dim = 384
 
 # coarse vocabs size
-coarse_vocabs_size = 128
+coarse_vocabs_size = 16384
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -33,19 +33,19 @@ fine_vocabs_count = 8
 use_residuals = 1
 
 # number of centroids handled in each subdimension
-subspace_centroids_count = 32
+subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'gist80K_queries.bvecs'
+queries_file = 'copy_queries.bvecs'
 
 # groundtruth file
-gnd_file = 'gist80K_groundtruth.ivecs'
+gnd_file = 'gist80K_copy_groundtruth.ivecs'
 
 # number of queries
-queries_count = 101
+queries_count = 157
 
 # number of neighbors to seek
-neighbors_count = 8000
+neighbors_count = 10000
 
 # should we rerank ?
 do_rerank = 1
