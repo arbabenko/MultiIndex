@@ -93,3 +93,22 @@ double GetPresicionAt(const int length, const set<PointId>& groundtruth,
   }
   return (double)found / length; 
 }
+
+double GetRecall(const vector<PointId>& groundtruth,
+                 const vector<DistanceToPoint>& result) {
+  if(groundtruth.empty()) {
+    cout << "Groundtruth is empty!" << endl;
+    return 0;
+  }
+  std::set<PointId> returned_points;
+  for(int i = 0; i < result.size(); ++i) {
+      returned_points.insert(result[i].second);
+  }
+  double found = 0.0;
+  for(int index = 0; index < groundtruth.size(); ++index) {
+      if(returned_points.find(groundtruth[index]) != returned_points.end()) {
+          found += 1;
+      }
+  }
+  return found / groundtruth.size();
+}

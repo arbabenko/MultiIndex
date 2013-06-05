@@ -84,3 +84,9 @@ int GetRecallAt(const int length, const vector<PointId>& groundtruth,
  */
 double GetPresicionAt(const int length, const set<PointId>& groundtruth,
                       const vector<DistanceToPoint>& result);
+
+/**
+ *  This function returns recall at full length
+ */
+double GetRecall(const vector<PointId>& groundtruth,
+                 const vector<DistanceToPoint>& result);

@@ -1,5 +1,5 @@
-mkdir -p build_master
-cd build_master
+mkdir -p build_dup
+cd build_dup
 rm ./CMakeCache.txt
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make

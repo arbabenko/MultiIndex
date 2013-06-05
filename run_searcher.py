@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_master'
+build_folder = './build_dup'
 
 
 # Folder with BigAnn base
@@ -15,7 +15,7 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 2
+multiplicity = 4
 
 # prefix of all vocabs, coarse quantizations, etc.
 prefix = 'gist80K_copy'
@@ -24,7 +24,7 @@ prefix = 'gist80K_copy'
 space_dim = 384
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 128
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -33,7 +33,7 @@ fine_vocabs_count = 8
 use_residuals = 1
 
 # number of centroids handled in each subdimension
-subspace_centroids_count = 1024
+subspace_centroids_count = 32
 
 # queries file
 queries_file = 'copy_queries.bvecs'
