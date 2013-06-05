@@ -6,13 +6,13 @@ import sys
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_dup'
+build_folder = './build_master'
 
 # number of threads to use (max = 32)
-threads_count = 2
+threads_count = 32
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 2
+multiplicity = 4
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'
@@ -21,31 +21,31 @@ bigann_root = '/sata/ResearchData/BigAnn'
 input_type = 'BVEC'
 
 # file with input point (.bvecs or .fvecs)
-points_file = 'copy_base.bvecs'
+points_file = 'sift1B.bvecs'
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'gist80K'
+prefix = 'sift1B'
 
 # input points count
-points_count = 157
+points_count = 1000000000
 
 # dimension of input space
-space_dim = 384
+space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 128
 
 # fine vocabs count
-fine_vocabs_count = 8
+fine_vocabs_count = 16
 
 # should we use residuals?
 use_residuals = 1
 
 # should we calculate coarse quantizations?
-build_coarse = 1
+build_coarse = 0
 
 # postfix added by users to all multiindex files
-user_added_postfix = 'copy'
+user_added_postfix = ''
 
 ##################################################
 

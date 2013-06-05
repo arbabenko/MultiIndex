@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_dup'
+build_folder = './build_master'
 
 
 # Folder with BigAnn base
@@ -15,37 +15,37 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 4
+multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'gist80K_copy'
+prefix = 'gist80K'
 
 # dimension of input space
 space_dim = 384
 
 # coarse vocabs size
-coarse_vocabs_size = 128
+coarse_vocabs_size = 16384
 
 # fine vocabs count
-fine_vocabs_count = 8
+fine_vocabs_count = 16
 
 # should we use residuals?
 use_residuals = 1
 
 # number of centroids handled in each subdimension
-subspace_centroids_count = 32
+subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'copy_queries.bvecs'
+queries_file = 'gist80K_queries.bvecs'
 
 # groundtruth file
-gnd_file = 'gist80K_copy_groundtruth.ivecs'
+gnd_file = 'gist80K_groundtruth.ivecs'
 
 # number of queries
-queries_count = 157
+queries_count = 101
 
 # number of neighbors to seek
-neighbors_count = 10000
+neighbors_count = 100000
 
 # should we rerank ?
 do_rerank = 1
@@ -67,7 +67,7 @@ coarse_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coars
 fine_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '.dat'
 filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + user_added_postfix
 
-launch_time = datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
+launch_time = datetime.datetime.now().strftime("%I_%M_%S%p_%B_%d_%Y")
 os.system('mkdir -p ' + build_folder + '/' + launch_time)
 os.system('cp ' + build_folder + '/searcher_tester ' + build_folder + '/' + launch_time)
 os.system('cp run_searcher.py ' + build_folder + '/' + launch_time)
@@ -93,5 +93,6 @@ if do_rerank:
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
 f.close()
-os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/log.txt' + ' &')
-print 'Log file: ' + build_folder + '/' + launch_time + '/log.txt' 
+log_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '_' + str(neighbors_count) + '.txt'
+os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/' + log_filename + ' &')
+print 'Log file: ' + build_folder + '/' + launch_time + '/' + log_filename 
