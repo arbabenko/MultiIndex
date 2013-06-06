@@ -93,4 +93,7 @@ if do_rerank:
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
 f.close()
-os.system(launch_line) 
+log_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '_' + str(neighbors_count) + '.txt'
+os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/' + log_filename + ' &')
+print 'Log file: ' + build_folder + '/' + launch_time + '/' + log_filename
+
