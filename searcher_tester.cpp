@@ -134,25 +134,27 @@ void TestSearcher(TSearcher& searcher,
                 subspaces_centroids_count,
                 do_rerank);
   cout << "Searcher inited ...\n";
-  vector<double> recalls(5, 0.0);
+  //vector<double> recalls(5, 0.0);
   vector<DistanceToPoint> result;
-  for(int k = 0; k < 1; ++k) {
+  for(int k = 0; k < 24; ++k) {
+    neighbours_count = std::pow(2,k);
     clock_t start = clock();
+    vector<double> recalls(5, 0.0);
     for(int i = 0; i < queries_count; ++i) {
       std::cout << i << std::endl;
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
-      recalls[0] += GetRecallAt(1, groundtruth[i], result);
-      recalls[1] += GetRecallAt(10, groundtruth[i], result);
-      recalls[2] += GetRecallAt(100, groundtruth[i], result);
-      recalls[3] += GetRecallAt(1000, groundtruth[i], result);
-      recalls[4] += GetRecallAt(10000, groundtruth[i], result);
+      //recalls[0] += GetRecallAt(1, groundtruth[i], result);
+      //recalls[1] += GetRecallAt(10, groundtruth[i], result);
+      //recalls[2] += GetRecallAt(100, groundtruth[i], result);
+      //recalls[3] += GetRecallAt(1000, groundtruth[i], result);
+      recalls[4] += GetRecallAt(result.size(), groundtruth[i], result);
       result.clear();
     }
-    cout << "R@1 "     << recalls[0] / queries_count << "\n" <<
-            "R@10 "    << recalls[1] / queries_count << "\n" <<
-            "R@100 "   << recalls[2] / queries_count << "\n" <<
-            "R@1000 "  << recalls[3] / queries_count << "\n" <<
-            "R@10000 " << recalls[4] / queries_count << endl;
+    cout << //"R@1 "     << recalls[0] / queries_count << "\n" <<
+            //"R@10 "    << recalls[1] / queries_count << "\n" <<
+            //"R@100 "   << recalls[2] / queries_count << "\n" <<
+            //"R@1000 "  << recalls[3] / queries_count << "\n" <<
+            "R@" << result.size() << " " << recalls[4] / queries_count << endl;
     searcher.GetPerfTester().DoReport();
     clock_t finish = clock();
     std::cout << "Average search time(ms): "<<(double)(finish - start) / queries.size() << std::endl;
