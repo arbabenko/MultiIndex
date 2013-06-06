@@ -39,10 +39,10 @@ subspace_centroids_count = 1024
 queries_file = 'sift1B_PCA32_smart_queries.fvecs'
 
 # groundtruth file
-gnd_file = 'idx_1000M.ivecs'
+gnd_file = 'sift1B_groundtruth.ivecs'
 
 # number of queries
-queries_count = 3
+queries_count = 10000
 
 # number of neighbors to seek
 neighbors_count = 10000
@@ -51,7 +51,7 @@ neighbors_count = 10000
 do_rerank = 1
 
 # postfix added by users to all multiindex files
-user_added_postfix = '_test'
+user_added_postfix = ''
 
 ##################################################
 
