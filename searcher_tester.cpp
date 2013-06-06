@@ -143,7 +143,6 @@ void TestSearcher(TSearcher& searcher,
     for(int i = 0; i < queries_count; ++i) {
       std::cout << i << std::endl;
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
-      std::cout << result[0].second << " " <<  result[1].second << " " << groundtruth[i][0] << std::endl;
       //recalls[0] += GetRecallAt(1, groundtruth[i], result);
       //recalls[1] += GetRecallAt(10, groundtruth[i], result);
       //recalls[2] += GetRecallAt(100, groundtruth[i], result);
