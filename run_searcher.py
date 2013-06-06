@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_pca_smart'
+build_folder = './build_pca_naive'
 
 
 # Folder with BigAnn base
@@ -18,7 +18,7 @@ query_input_type = 'FVEC'
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1B_PCA32_smart'
+prefix = 'sift1B_PCA32_naive'
 
 # dimension of input space
 space_dim = 32
@@ -36,13 +36,13 @@ use_residuals = 1
 subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'sift1B_PCA32_smart_queries.fvecs'
+queries_file = 'sift1B_PCA32_naive_queries.fvecs'
 
 # groundtruth file
-gnd_file = 'idx_1000M.ivecs'
+gnd_file = 'sift1B_groundtruth.ivecs'
 
 # number of queries
-queries_count = 3
+queries_count = 10000
 
 # number of neighbors to seek
 neighbors_count = 10000
@@ -51,7 +51,7 @@ neighbors_count = 10000
 do_rerank = 1
 
 # postfix added by users to all multiindex files
-user_added_postfix = '_test'
+user_added_postfix = ''
 
 ##################################################
 
@@ -93,4 +93,7 @@ if do_rerank:
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
 f.close()
-os.system(launch_line) 
+log_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '_' + str(neighbors_count) + '.txt'
+os.system('nohup ' + launch_line + ' > ' + build_folder + '/' + launch_time + '/' + log_filename + ' &')
+print 'Log file: ' + build_folder + '/' + launch_time + '/' + log_filename
+ 
