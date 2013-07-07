@@ -381,7 +381,7 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k,
     traverse_next_cell = TraverseNextMultiIndexCell(point, neighbours);
     cells_visited += 1;
   }
-  int real_neighbours_count = std::min(found_neghbours_count_, 10000);
+  int real_neighbours_count = std::min(found_neghbours_count_, k);
   neighbours->resize(real_neighbours_count);
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
