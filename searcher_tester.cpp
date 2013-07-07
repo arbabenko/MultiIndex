@@ -154,7 +154,7 @@ void TestSearcher(TSearcher& searcher,
             //"R@10 "    << recalls[1] / queries_count << "\n" <<
             //"R@100 "   << recalls[2] / queries_count << "\n" <<
             //"R@1000 "  << recalls[3] / queries_count << "\n" <<
-            "R@" << result.size() << " " << recalls[4] / queries_count << endl;
+            "R@" << neighbours_count << " " << recalls[4] / queries_count << endl;
     searcher.GetPerfTester().DoReport();
     clock_t finish = clock();
     std::cout << "Average search time(ms): "<<(double)(finish - start) / queries.size() << std::endl;

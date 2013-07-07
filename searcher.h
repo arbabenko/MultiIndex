@@ -388,7 +388,6 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k,
   if(do_rerank_) {
     std::sort(neighbours->begin(), neighbours->end());
   }
-  std::cout << neighbours->at(0).first << neighbours->at(1).first << neighbours->at(2).first << std::endl;
   clock_t finish = clock();
   perf_tester_.full_search_time += finish - start;
 }
