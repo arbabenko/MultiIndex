@@ -260,7 +260,6 @@ void MultiSearcher<Record, MetaInfo>::GetNearestSubspacesCentroids(const Point& 
                                                                    const int subspace_centroins_count,
                                                                    vector<NearestSubspaceCentroids>*
                                                                    subspaces_short_lists) const {
-  std::stringstream aa;
   subspaces_short_lists->resize(coarse_vocabs_.size());
   Dimensions subspace_dimension = point.size() / coarse_vocabs_.size();
   for(int subspace_index = 0; subspace_index < coarse_vocabs_.size(); ++subspace_index) {
@@ -368,13 +367,11 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, i
     traverse_next_cell = TraverseNextMultiIndexCell(point, neighbours);
     cells_visited += 1;
   }
+  int real_neighbours_count = std::min(found_neghbours_count_, k);
+  neighbours->resize(real_neighbours_count);
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
   if(do_rerank_) {
-    if(neighbours->size() > 10000) {
-      std::nth_element(neighbours->begin(), neighbours->begin() + 10000, neighbours->end());
-      neighbours->resize(10000);
-    }
     std::sort(neighbours->begin(), neighbours->end());
   }
   clock_t finish = clock();
