@@ -15,7 +15,7 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 2
+multiplicity = 1
 
 # prefix of all vocabs, coarse quantizations, etc.
 prefix = 'sift1M'
