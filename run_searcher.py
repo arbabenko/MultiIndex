@@ -18,16 +18,16 @@ query_input_type = 'BVEC'
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'gist80K'
+prefix = 'sift1M'
 
 # dimension of input space
-space_dim = 384
+space_dim = 128
 
 # coarse vocabs size
 coarse_vocabs_size = 16384
 
 # fine vocabs count
-fine_vocabs_count = 16
+fine_vocabs_count = 8
 
 # should we use residuals?
 use_residuals = 1
@@ -36,16 +36,16 @@ use_residuals = 1
 subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'gist80K_queries.bvecs'
+queries_file = 'sift1B_queries.bvecs'
 
 # groundtruth file
-gnd_file = 'gist80K_groundtruth.ivecs'
+gnd_file = 'sift1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 101
+queries_count = 20
 
 # number of neighbors to seek
-neighbors_count = 100000
+neighbors_count = 10000
 
 # should we rerank ?
 do_rerank = 1
