@@ -302,6 +302,8 @@ void MultiIndexer<Record>::SerializeMultiIndexFiles() {
   cout << "Finish multiindex serializing....\n";
 }
 
+std::ofstream dist("distors.txt");
+
 template<class Record>
 void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filename,
                                                            const int start_pid,
@@ -324,6 +326,7 @@ void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_
     Point current_point;
     ReadPoint(point_stream, &current_point);
     int subpoints_dimension = SPACE_DIMENSION / multiplicity_;
+    float distors = 0.0;
     for(int coarse_index = 0; coarse_index < multiplicity_; ++coarse_index) {
       Dimensions start_dim = coarse_index * subpoints_dimension;
       Dimensions final_dim = start_dim + subpoints_dimension;
@@ -331,9 +334,13 @@ void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_
                                               start_dim, final_dim);
       transposed_coarse_quantizations->at(coarse_index)[start_pid + point_number] = nearest;
       coarse_quantization[coarse_index] = nearest;
+      cblas_saxpy(subpoints_dimension, -1, &(coarse_vocabs.at(coarse_index)[nearest][0]), 1, &(current_point[start_dim]), 1);
+      distors += cblas_sdot(subpoints_dimension, &(current_point[start_dim]), 1, &(current_point[start_dim]), 1);
     }
+    
     int global_index = point_in_cells_count_.GetCellGlobalIndex(coarse_quantization);
     cell_counts_mutex_.lock();
+    dist << distors << std::endl;
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }
