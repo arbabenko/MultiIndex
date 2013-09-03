@@ -15,13 +15,13 @@ using namespace boost::program_options;
  */
 Dimensions SPACE_DIMENSION;
 /**
- * File with vocabularies for multiindex structure
+ * File with vocabularies for hierarchical index structure
  */
-string coarse_vocabs_file;
+string main_vocabs_file;
 /**
- * File with vocabularies for reranking
+ * File with vocabularies for residuals
  */
-string fine_vocabs_file;
+string res_vocabs_file;
 /**
  * Reranking approach, should be USE_RESIDUALS or USE_INIT_POINTS
  */
@@ -59,9 +59,9 @@ int neighbours_count;
  */
 string report_file;
 /**
- * Number of nearest centroids for each group of dimensions to handle
+ * Number of main centroids to handle for a query
  */
-int subspaces_centroids_count;
+int main_centroids_count;
 
 
 
@@ -73,15 +73,15 @@ int SetOptions(int argc, char** argv) {
     ("queries_count,n", value<int>())
     ("neighbours_count,k", value<int>())
     ("groundtruth_file,g", value<string>())
-    ("coarse_vocabs_file,c", value<string>())
-    ("fine_vocabs_file,f", value<string>())
+    ("main_vocabs_file,c", value<string>())
+    ("res_vocabs_file,f", value<string>())
     ("query_point_type,t", value<string>())
     ("do_rerank,l", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
     ("points_count,p", value<int>())
     ("report_file,o", value<string>())
     ("space_dim,d", value<int>())
-    ("subspaces_centroids_count,s", value<int>());
+    ("main_centroids_count,s", value<int>());
   variables_map name_to_value;
   try {
     store(command_line_parser(argc, argv).options(description).run(), name_to_value);
@@ -104,8 +104,8 @@ int SetOptions(int argc, char** argv) {
     return 1;
   }
 
-  coarse_vocabs_file =         name_to_value["coarse_vocabs_file"].as<string>();
-  fine_vocabs_file =           name_to_value["fine_vocabs_file"].as<string>();
+  main_vocabs_file =           name_to_value["main_vocabs_file"].as<string>();
+  res_vocabs_file =            name_to_value["res_vocabs_file"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   index_files_prefix =         name_to_value["index_files_prefix"].as<string>();
   queries_file =               name_to_value["queries_file"].as<string>();
@@ -113,7 +113,7 @@ int SetOptions(int argc, char** argv) {
   groundtruth_file =           name_to_value["groundtruth_file"].as<string>();
   queries_count =              name_to_value["queries_count"].as<int>();
   neighbours_count =           name_to_value["neighbours_count"].as<int>();
-  subspaces_centroids_count =  name_to_value["subspaces_centroids_count"].as<int>();
+  main_centroids_count =       name_to_value["main_centroids_count"].as<int>();
  
   do_rerank =                  (name_to_value["do_rerank"].as<bool>() == true) ? true : false;
   mode =                       (name_to_value["use_residuals"].as<bool>() == true) ? USE_RESIDUALS : USE_INIT_POINTS;
@@ -129,10 +129,9 @@ template<class TSearcher>
 void TestSearcher(TSearcher& searcher,
                   const Points& queries,
                   const vector<vector<PointId> >& groundtruth) {
-  searcher.Init(index_files_prefix, coarse_vocabs_file,
-                fine_vocabs_file, mode,
-                subspaces_centroids_count,
-                do_rerank);
+  searcher.Init(index_files_prefix, main_vocabs_file,
+                res_vocabs_file, mode,
+                main_centroids_count, do_rerank);
   cout << "Searcher inited ...\n";
   vector<double> recalls(5, 0.0);
   vector<DistanceToPoint> result;
@@ -153,7 +152,7 @@ void TestSearcher(TSearcher& searcher,
             "R@100 "   << recalls[2] / queries_count << "\n" <<
             "R@1000 "  << recalls[3] / queries_count << "\n" <<
             "R@10000 " << recalls[4] / queries_count << endl;
-    searcher.GetPerfTester().DoReport();
+    //searcher.GetPerfTester().DoReport();
     clock_t finish = clock();
     std::cout << "Average search time(ms): "<<(double)(finish - start) / queries.size() << std::endl;
   }
@@ -173,14 +172,14 @@ int main(int argc, char** argv) {
   ReadPoints<int, PointId>(groundtruth_file, &groundtruth, queries_count);
   MKL_Set_Num_Threads(1);
   cout << "Groundtruth is read ...\n";
-  vector<Centroids> fine_vocabs;
-  ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
-  if(fine_vocabs.size() == 8) {
-    MultiSearcher<RerankADC8, PointId> searcher;
-    TestSearcher<MultiSearcher<RerankADC8, PointId> > (searcher, queries, groundtruth);
-  } else if(fine_vocabs.size() == 16) {
-    MultiSearcher<RerankADC16, PointId> searcher;
-    TestSearcher<MultiSearcher<RerankADC16, PointId> > (searcher, queries, groundtruth);
-  }
+  //vector<Centroids> fine_vocabs;
+  //ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
+  //if(fine_vocabs.size() == 8) {
+  //  MultiSearcher<RerankADC8, PointId> searcher;
+  //  TestSearcher<MultiSearcher<RerankADC8, PointId> > (searcher, queries, groundtruth);
+  //} else if(fine_vocabs.size() == 16) {
+  //  MultiSearcher<RerankADC16, PointId> searcher;
+  //  TestSearcher<MultiSearcher<RerankADC16, PointId> > (searcher, queries, groundtruth);
+  //}
   return 0;
 }

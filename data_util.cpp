@@ -71,6 +71,12 @@ void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizati
   }
 }
 
+void GetResidual(const Point& point, const Point& centroid, Point* residual) {
+  residual->resize(point.size());
+  cblas_saxpy(point.size(), 1, &(point[0]), 1, &(residual->at(0)), 1);
+  cblas_saxpy(point.size(), -1, &(centroid[0]), 1, &(residual->at(0)), 1);
+}
+
 void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
                  const vector<Centroids>& centroids, Coord* residual) {
   Dimensions subvector_dimension = point.size() / centroids.size();

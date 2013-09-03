@@ -285,6 +285,26 @@ void ReadVocabularies(const string& filename,
   }
 }
 
+template<class T>
+void ReadCentroids(const string& filename,
+                   Dimensions space_dimension,
+                   Centroids* centroids) {
+  ifstream vocabulary;
+  vocabulary.open(filename.c_str(), ios::binary);
+  if(!vocabulary.good()) {
+    throw std::logic_error("Bad vocabulary file");
+  }
+  int dimension;
+  vocabulary.read((char*)&dimension, sizeof(dimension));
+  if(dimension <= 0) {
+    throw std::logic_error("Bad file content: non-positive dimension");
+  };
+  int vocabulary_size;
+  vocabulary.read((char*)&vocabulary_size, sizeof(vocabulary_size));
+  centroids->resize(vocabulary_size);
+  ReadVocabulary<T>(vocabulary, space_dimension, vocabulary_size, centroids);
+}
+
 /**
  * This function reads fine vocabs of centroids
  * @param fine_vocabs_filename file with vocabularies
@@ -349,6 +369,8 @@ ClusterId GetNearestClusterId(const Point& point, const Centroids& centroids,
  */
 void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
                  const vector<Centroids>& centroids, Point* residual);
+
+void GetResidual(const Point& point, const Point& centroid, Point* residual);
 /**
  * This function calculates quantization residual. 
  * @param point initial point

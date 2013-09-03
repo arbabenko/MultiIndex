@@ -41,60 +41,63 @@ extern enum PointType point_type;
 IndexConfig gConfig;
 
 /**
- * This is the main class for creating multiindex for a set of points
+ * This is the main class for creating hierarchical index for a set of points
  * in a multidimensional space. Clusterization and vocabs learning happen
- * outside of this class, multiindexer receives prepared vocabs in input
+ * outside of this class, indexer receives prepared vocabs in input
  */
 template<class Record>
-class MultiIndexer {
+class Indexer {
  public:
  /**
-  * This is the simple MultiIndexer constructor
-  * @param multiplicity how many parts input points will be divide on
+  * This is the simple Indexer constructor
   */
-  MultiIndexer(const int multiplicity = 2);
+  Indexer();
  /**
-  * This is the main function of MultiIndexer
+  * This is the main function of Indexer
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param points_count how many points should we index
-  * @param coarse_vocabs vocabularies for coarse quantization
-  * @param fine_vocabs vocabularies for fine quantization for reranking
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   * @param mode determines the way of rerank info calculating
   * @param build_coarse_quantization should we get coarse quantization or not
   * @param files_prefix all index filenames will have this prefix
   * @param coarse_quantization_filename file with coarse quantization (if exists)
   */
-  void BuildMultiIndex(const string& points_filename,
-                       const string& metainfo_filename,
-                       const int points_count,
-                       const vector<Centroids>& coarse_vocabs,
-                       const vector<Centroids>& fine_vocabs,
-                       const RerankMode& mode,
-                       const bool build_coarse_quantization,
-                       const string& files_prefix,
-                       const string& coarse_quantization_filename = "");
+  void BuildHierIndex(const string& points_filename,
+                      const string& metainfo_filename,
+                      const int points_count,
+                      const Centroids& main_vocabs,
+                      const Centroids& res_vocabs,
+                      const RerankMode& mode,
+                      const bool build_coarse_quantization,
+                      const string& files_prefix,
+                      const string& coarse_quantization_filename = "");
  private:
  /**
-  * This function prepares for each point its coarse quantization
+  * This function calculates for each point its main vocab and residual vocab
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param points_count how many points should we handle
-  * @param coarse_vocabs vocabularies for coarse quantization
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   */
   void PrepareCoarseQuantization(const string& points_filename,
                                  const int points_count,
-                                 const vector<Centroids>& coarse_vocabs);
+                                 const Centroids& main_vocabs,
+                                 const Centroids& res_vocabs);
  /**
-  * This function prepares for each point in subset its coarse quantization
+  * This function prepares for each point in subset its main vocab and residual vocab
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param start_pid identifier of the first point in subset
   * @param subset_size points count in subset
-  * @param coarse_vocabs vocabularies for coarse quantization
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   * @param transposed_coarse_quantizations result
   */
   void GetCoarseQuantizationsForSubset(const string& points_filename,
                                        const int start_pid,
                                        const int subset_size,
-                                       const vector<Centroids>& coarse_vocabs,
+                                       const Centroids& main_vocabs,
+                                       const Centroids& res_vocabs,
                                        vector<vector<ClusterId> >*
                                        transposed_coarse_quantizations);
  /**
@@ -107,45 +110,45 @@ class MultiIndexer {
                                     transposed_coarse_quantizations,
                                     const string& filename);
  /**
-  * This function saves index to files.
+  * This function saves hierarchical index to files.
   * All filenames start form the common files prefix
   */
-  void SerializeMultiIndexFiles();
+  void SerializeHierIndexFiles();
  /**
   * This function converts counts of points in cells to cell edges
   */
   void ConvertPointsInCellsCountToCellEdges();
 
  /**
-  * This function fills multiindex data structures.
+  * This function fills hierarchical index data structures.
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param points_count how many points should we index
-  * @param coarse_vocabs vocabularies for coarse quantization
-  * @param fine_vocabs vocabularies for fine quantization for reranking
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   * @param mode determines the way of rerank info calculating
   */
-  void FillMultiIndex(const string& points_filename,
-                      const int points_count,
-                      const vector<Centroids>& coarse_vocabs,
-                      const vector<Centroids>& fine_vocabs,
-                      const RerankMode& mode);
+  void FillHierIndex(const string& points_filename,
+                     const int points_count,
+                     const Centroids& main_vocabs,
+                     const Centroids& res_vocabs,
+                     const RerankMode& mode);
  /**
-  * This function fills multiindex data structures.
+  * This function fills hierarchical index data structures.
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param start_pid identifier of the first point in subset
   * @param subset_size points count in subset
-  * @param coarse_vocabs vocabularies for coarse quantization
-  * @param fine_vocabs vocabularies for fine quantization for reranking
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   * @param mode determines the way of rerank info calculating
   * @param points_written_in_index auxillary structure for correct index filling
   */
-  void FillMultiIndexForSubset(const string& points_filename,
-                               const PointId start_pid,
-                               const int points_count,
-                               const vector<Centroids>& coarse_vocabs,
-                               const vector<Centroids>& fine_vocabs,
-                               const RerankMode& mode,
-                               Multitable<int>* points_written_in_index);
+  void FillHierIndexForSubset(const string& points_filename,
+                              const PointId start_pid,
+                              const int points_count,
+                              const Centroids& main_vocabs,
+                              const Centroids& res_vocabs,
+                              const RerankMode& mode,
+                              Multitable<int>* points_written_in_index);
 
  /**
   * This function reads point coarse quantization from file
@@ -157,24 +160,20 @@ class MultiIndexer {
                                   const string& filename,
                                   vector<ClusterId>* coarse_quantization);
  /**
-  * This function calculates rerank info for point
-  * @param point target point
-  * @param pid identifier of target point
-  * @param fine_vocabs vocabularies for rerank info calculation
-  */
-  void FillPointRerankInfo(const Point& point,
-                           const PointId pid,
-                           const vector<Centroids>& fine_vocabs);
- /**
   * This function restores counts of points from coarse quantizations
   * @param points_filename file with points in .fvecs or .bvecs format
   * @param points_count how many points should we index
-  * @param coarse_vocabs vocabularies for coarse quantization
+  * @param main_vocabs vocabularies for initial points
+  * @param res_vocabs vocabularies for residuals
   * We need them to init counts table correctly
   */
   void RestorePointsInCellsCountFromCourseQuantization(const string& points_filename,
                                                        const int points_count,
-                                                       const vector<Centroids>& coarse_vocabs);
+                                                       const Centroids& main_vocabs,
+                                                       const Centroids& res_vocabs);
+
+  void PrecomputeEffectiveCentroidsNorms(const Centroids& main_vocabs,
+                                         const Centroids& res_vocabs);
  /**
   * This simple function returns size of one coordinate of input point
   */
@@ -185,11 +184,7 @@ class MultiIndexer {
   * @param point result point
   */
   void ReadPoint(ifstream& input, Point* point);
- /**
-  * Initialize all structures for BLAS operations
-  * @param coarse_vocabs coarse vocabularies
-  */
-  void InitBlasStructures(const vector<Centroids>& coarse_vocabs);	
+
  /**
   *  All index filenames will start from this prefix
   */
@@ -198,10 +193,6 @@ class MultiIndexer {
   *  Filename of file with coarse quantizations
   */
   string coarse_quantization_filename_;
- /**
-  *  Multiplicity (how many parts point space is divided on)
-  */
-  int multiplicity_;
  /**
   *  Table with number of points in each cell
   */
@@ -214,14 +205,8 @@ class MultiIndexer {
   *  Mutex for critical section in filling index stage
   */
   boost::mutex cell_counts_mutex_;
- /**
-  * Struct for BLAS
-  */
-  vector<float*> coarse_vocabs_matrices_;
- /**
-  * Struct for BLAS
-  */
-  vector<vector<float> > coarse_centroids_norms_;
+
+  vector<vector<float> > precomputed_norms_;
 };
 
 template<class Record>
@@ -242,15 +227,11 @@ void InitParameters(const vector<Centroids>& fine_vocabs,
 
 //////////////////// IMPLEMENTATION //////////////////////
 template<class Record>
-MultiIndexer<Record>::MultiIndexer(const int multiplicity) {
-  if(multiplicity < 0) {
-    throw std::logic_error("Multiplicity < 0");
-  }
-  multiplicity_ = multiplicity;
+Indexer<Record>::Indexer() {
 }
 
 template<class Record>
-int MultiIndexer<Record>::GetInputCoordSizeof() {
+int Indexer<Record>::GetInputCoordSizeof() {
   if(point_type == FVEC) {
     return (int)sizeof(float);
   } else if(point_type == BVEC) {
@@ -259,7 +240,7 @@ int MultiIndexer<Record>::GetInputCoordSizeof() {
 }
 
 template<class Record>
-void MultiIndexer<Record>::ReadPoint(ifstream& input, Point* point) {
+void Indexer<Record>::ReadPoint(ifstream& input, Point* point) {
   if(!input.good()) {
     throw std::logic_error("Bad input stream");
   }
@@ -271,7 +252,23 @@ void MultiIndexer<Record>::ReadPoint(ifstream& input, Point* point) {
 }
 
 template<class Record>
-void MultiIndexer<Record>::SerializeCoarseQuantizations(const vector<vector<ClusterId> >&
+void Indexer<Record>::PrecomputeEffectiveCentroidsNorms(const Centroids& main_vocabs,
+                                                        const Centroids& res_vocabs) {
+    precomputed_norms_.resize(main_vocabs.size());
+    for(int i = 0; i < main_vocabs.size(); ++i) {
+        precomputed_norms_[i].resize(res_vocabs.size());
+        for(int j = 0; j < res_vocabs.size(); ++j) {
+            Point temp(main_vocabs[0].size());
+            cblas_saxpy(temp.size(), 1, &(main_vocabs[i][0]), 1, &(temp[0]), 1);
+            cblas_saxpy(temp.size(), 1, &(res_vocabs[j][0]), 1, &(temp[0]), 1);
+            precomputed_norms_[i][j] = cblas_sdot(temp.size(), &(temp[0]), 1, &(temp[0]), 1);
+        }
+    }
+}
+
+
+template<class Record>
+void Indexer<Record>::SerializeCoarseQuantizations(const vector<vector<ClusterId> >&
 		                                                          transposed_coarse_quantizations,
                                                         const string& filename) {
   ofstream quantizations_stream;
@@ -281,8 +278,8 @@ void MultiIndexer<Record>::SerializeCoarseQuantizations(const vector<vector<Clus
   }
   cout << "Writing coarse quantizations started" << endl;
   for(PointId pid = 0; pid < transposed_coarse_quantizations[0].size(); ++pid) {
-    for(int subspace_index = 0; subspace_index < multiplicity_; ++subspace_index) {
-      ClusterId quantization = transposed_coarse_quantizations[subspace_index][pid];
+    for(int index = 0; index < transposed_coarse_quantizations.size(); ++index) {
+      ClusterId quantization = transposed_coarse_quantizations[index][pid];
       quantizations_stream.write((char*)&quantization, sizeof(quantization));
     }
   }
@@ -291,24 +288,28 @@ void MultiIndexer<Record>::SerializeCoarseQuantizations(const vector<vector<Clus
 }
 
 template<class Record>
-void MultiIndexer<Record>::SerializeMultiIndexFiles() {
-  cout << "Start multiindex serializing....\n";
+void Indexer<Record>::SerializeHierIndexFiles() {
+  cout << "Start hierindex serializing....\n";
   ofstream cell_edges(string(files_prefix_ + "_cell_edges.bin").c_str(), ios::binary);
   boost::archive::binary_oarchive arc_cell_edges(cell_edges);
   arc_cell_edges << multiindex_.cell_edges;
   ofstream multi_array(string(files_prefix_ + "_multi_array.bin").c_str(), ios::binary);
   boost::archive::binary_oarchive arc_multi_array(multi_array);
   arc_multi_array << multiindex_.multiindex;
-  cout << "Finish multiindex serializing....\n";
+  ofstream norms(string(files_prefix_ + "_prec_norms.bin").c_str(), ios::binary);
+  boost::archive::binary_oarchive arc_norms(norms);
+  arc_norms << precomputed_norms_;
+  cout << "Finish hierindex serializing....\n";
 }
 
 template<class Record>
-void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filename,
-                                                           const int start_pid,
-                                                           const int subset_size,
-                                                           const vector<Centroids>& coarse_vocabs,
-                                                           vector<vector<ClusterId> >*
-                                                                  transposed_coarse_quantizations) {
+void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filename,
+                                                      const int start_pid,
+                                                      const int subset_size,
+                                                      const Centroids& main_vocabs,
+                                                      const Centroids& res_vocabs,
+                                                      vector<vector<ClusterId> >*
+                                                            transposed_coarse_quantizations) {
   ifstream point_stream;
   point_stream.open(points_filename.c_str(), ios::binary);
   if(!point_stream.good()) {
@@ -316,22 +317,21 @@ void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_
   }
   // we assume points are stored in .fvecs or .bvecs format
   point_stream.seekg(start_pid * (GetInputCoordSizeof() * SPACE_DIMENSION + sizeof(Dimensions)), ios::beg);
-  vector<ClusterId> coarse_quantization(multiplicity_);
+  vector<ClusterId> coarse_quantization(2);
   for(int point_number = 0; point_number < subset_size; ++point_number) {
     if(point_number % 10000 == 0) {
       cout << "Getting coarse quantization, point # " << start_pid + point_number << endl;
     }
     Point current_point;
     ReadPoint(point_stream, &current_point);
-    int subpoints_dimension = SPACE_DIMENSION / multiplicity_;
-    for(int coarse_index = 0; coarse_index < multiplicity_; ++coarse_index) {
-      Dimensions start_dim = coarse_index * subpoints_dimension;
-      Dimensions final_dim = start_dim + subpoints_dimension;
-      ClusterId nearest = GetNearestClusterId(current_point, coarse_vocabs.at(coarse_index),
-                                              start_dim, final_dim);
-      transposed_coarse_quantizations->at(coarse_index)[start_pid + point_number] = nearest;
-      coarse_quantization[coarse_index] = nearest;
-    }
+    ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
+    Point residual;
+    GetResidual(current_point, main_vocabs[nearest], &residual);
+    ClusterId res_nearest = GetNearestClusterId(residual, res_vocabs, 0, current_point.size() - 1);
+    transposed_coarse_quantizations->at(0)[start_pid + point_number] = nearest;
+    coarse_quantization[0] = nearest;
+    transposed_coarse_quantizations->at(1)[start_pid + point_number] = res_nearest;
+    coarse_quantization[1] = res_nearest;
     int global_index = point_in_cells_count_.GetCellGlobalIndex(coarse_quantization);
     cell_counts_mutex_.lock();
     ++(point_in_cells_count_.table[global_index]);
@@ -340,26 +340,28 @@ void MultiIndexer<Record>::GetCoarseQuantizationsForSubset(const string& points_
 }
 
 template<class Record>
-void MultiIndexer<Record>::PrepareCoarseQuantization(const string& points_filename,
-                                                     const int points_count,
-                                                     const vector<Centroids>& coarse_vocabs) {
+void Indexer<Record>::PrepareCoarseQuantization(const string& points_filename,
+                                                const int points_count,
+                                                const Centroids& main_vocabs,
+                                                const Centroids& res_vocabs) {
   // we use transposed quantizations for efficient memory usage
   vector<vector<ClusterId> > transposed_coarse_quantizations; 
-  transposed_coarse_quantizations.resize(multiplicity_);
+  transposed_coarse_quantizations.resize(2);
+  transposed_coarse_quantizations[0].resize(points_count);
+  transposed_coarse_quantizations[1].resize(points_count);
   vector<int> multiindex_table_dimensions;
-  for(int i = 0; i < multiplicity_; ++i) {
-    transposed_coarse_quantizations[i].resize(points_count);
-    multiindex_table_dimensions.push_back(coarse_vocabs[i].size());
-  }
+  multiindex_table_dimensions.push_back(main_vocabs.size());
+  multiindex_table_dimensions.push_back(res_vocabs.size());
   point_in_cells_count_.Resize(multiindex_table_dimensions);
   cout << "Memory for coarse quantizations allocated" << endl;
   boost::thread_group index_threads;
   int thread_points_count = points_count / THREADS_COUNT;
   for(int thread_id = 0; thread_id < THREADS_COUNT; ++thread_id) {
     PointId start_pid = thread_points_count * thread_id;
-    index_threads.create_thread(boost::bind(&MultiIndexer::GetCoarseQuantizationsForSubset,
+    index_threads.create_thread(boost::bind(&Indexer::GetCoarseQuantizationsForSubset,
                                             this, points_filename, start_pid, thread_points_count,
-                                            boost::cref(coarse_vocabs), &transposed_coarse_quantizations));
+                                            boost::cref(main_vocabs), boost::cref(res_vocabs),
+                                            &transposed_coarse_quantizations));
   }
   index_threads.join_all();
   if(coarse_quantization_filename_.empty()) {
@@ -371,7 +373,7 @@ void MultiIndexer<Record>::PrepareCoarseQuantization(const string& points_filena
 }
 
 template<class Record>
-void MultiIndexer<Record>::ConvertPointsInCellsCountToCellEdges() {
+void Indexer<Record>::ConvertPointsInCellsCountToCellEdges() {
   cout << "Converting points in cells to cell edges...\n";
   multiindex_.cell_edges = point_in_cells_count_;
   multiindex_.cell_edges.table[0] = 0;
@@ -387,29 +389,29 @@ void MultiIndexer<Record>::ConvertPointsInCellsCountToCellEdges() {
 }
 
 template<class Record>
-void MultiIndexer<Record>::GetPointCoarseQuantization(const PointId pid,
-                                                      const string& filename,
-                                                      vector<ClusterId>* coarse_quantization) {
+void Indexer<Record>::GetPointCoarseQuantization(const PointId pid,
+                                                 const string& filename,
+                                                 vector<ClusterId>* coarse_quantization) {
   ifstream coarse_quantization_stream;
   coarse_quantization_stream.open(filename.c_str(), ios::binary);
   if(!coarse_quantization_stream.good()) {
     throw std::logic_error("Bad input coarse quantizations stream");
   }
-  coarse_quantization_stream.seekg((long long)pid * sizeof(ClusterId) * multiplicity_, ios::beg);
-  for(int coarse_index = 0; coarse_index < multiplicity_; ++coarse_index) {
-    coarse_quantization_stream.read((char*)&(coarse_quantization->at(coarse_index)),
-                                    sizeof(coarse_quantization->at(coarse_index)));
-  }
+  coarse_quantization_stream.seekg((long long)pid * sizeof(ClusterId) * 2, ios::beg);
+  coarse_quantization_stream.read((char*)&(coarse_quantization->at(0)),
+                                  sizeof(coarse_quantization->at(0)));
+  coarse_quantization_stream.read((char*)&(coarse_quantization->at(1)),
+                                  sizeof(coarse_quantization->at(1)));
 }
 
 template<class Record>
-void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename,
-                                                   const PointId start_pid,
-                                                   const int points_count,
-                                                   const vector<Centroids>& coarse_vocabs,
-                                                   const vector<Centroids>& fine_vocabs,
-                                                   const RerankMode& mode,
-                                                   Multitable<int>* points_written_in_index) {
+void Indexer<Record>::FillHierIndexForSubset(const string& points_filename,
+                                             const PointId start_pid,
+                                             const int points_count,
+                                             const Centroids& main_vocabs,
+                                             const Centroids& res_vocabs,
+                                             const RerankMode& mode,
+                                             Multitable<int>* points_written_in_index) {
   ifstream point_stream;
   point_stream.open(points_filename.c_str(), ios::binary);
   if(!point_stream.good()) {
@@ -418,30 +420,32 @@ void MultiIndexer<Record>::FillMultiIndexForSubset(const string& points_filename
   point_stream.seekg((long long)start_pid * (GetInputCoordSizeof() * SPACE_DIMENSION + sizeof(Dimensions)), ios::beg);
   for(int point_number = 0; point_number < points_count; ++point_number) {
     if(point_number % 10000 == 0) {
-      cout << "Filling multiindex, point # " << start_pid + point_number << endl;
+      cout << "Filling hierindex, point # " << start_pid + point_number << endl;
     }
   Point current_point;
   ReadPoint(point_stream, &current_point);
-  vector<ClusterId> coarse_quantization(multiplicity_);
+  vector<ClusterId> coarse_quantization(2);
   GetPointCoarseQuantization(start_pid + point_number,
                              coarse_quantization_filename_,
                              &coarse_quantization);
+  cell_counts_mutex_.lock();
   int current_written_count = points_written_in_index->GetValue(coarse_quantization);
   int pid_multiindex = multiindex_.cell_edges.GetValue(coarse_quantization) + current_written_count;
-  GetRecord<Record>(current_point, start_pid + point_number,
-                    coarse_quantization, coarse_vocabs, &(multiindex_.multiindex[pid_multiindex]));
-  cell_counts_mutex_.lock();
+  multiindex_.multiindex[pid_multiindex].pid = start_pid + point_number;
+  // TODO - add rerank info
+  //GetRecord<Record>(current_point, start_pid + point_number,
+  //                  coarse_quantization, coarse_vocabs, &(multiindex_.multiindex[pid_multiindex]));
   points_written_in_index->SetValue(current_written_count + 1, coarse_quantization);
   cell_counts_mutex_.unlock();
   }
 }
 
 template<class Record>
-void MultiIndexer<Record>::FillMultiIndex(const string& points_filename,
-                                          const int points_count,
-                                          const vector<Centroids>& coarse_vocabs,
-                                          const vector<Centroids>& fine_vocabs,
-                                          const RerankMode& mode) {
+void Indexer<Record>::FillHierIndex(const string& points_filename,
+                                    const int points_count,
+                                    const Centroids& main_vocabs,
+                                    const Centroids& res_vocabs,
+                                    const RerankMode& mode) {
   ConvertPointsInCellsCountToCellEdges();
   multiindex_.multiindex.resize(points_count);
   cout << "Indexing started..." << endl;
@@ -451,85 +455,86 @@ void MultiIndexer<Record>::FillMultiIndex(const string& points_filename,
   boost::thread_group threads;
   for(int thread_id = 0; thread_id < THREADS_COUNT; ++thread_id) {
     PointId start_pid = thread_points_count * thread_id;
-    threads.create_thread(boost::bind(&MultiIndexer::FillMultiIndexForSubset, this, points_filename, start_pid,
-                                      thread_points_count, boost::cref(coarse_vocabs),
-                                      boost::cref(fine_vocabs), mode, &points_written_in_index));
+    threads.create_thread(boost::bind(&Indexer::FillHierIndexForSubset, this, points_filename, start_pid,
+                                      thread_points_count, boost::cref(main_vocabs),
+                                      boost::cref(res_vocabs), mode, &points_written_in_index));
   }
   threads.join_all();
   cout << "Indexing finished..." << endl;
 }
 
 template<class Record>
-void MultiIndexer<Record>::RestorePointsInCellsCountFromCourseQuantization(const string& points_filename,
-                                                                           const int points_count,
-                                                                           const vector<Centroids>& coarse_vocabs) {
+void Indexer<Record>::RestorePointsInCellsCountFromCourseQuantization(const string& points_filename,
+                                                                      const int points_count,
+                                                                      const Centroids& main_vocabs,
+                                                                      const Centroids& res_vocabs) {
   vector<int> dimensions;
-  for(int i = 0; i < multiplicity_; ++i) {
-    dimensions.push_back(coarse_vocabs[i].size());
-  }
+  dimensions.push_back(main_vocabs.size());
+  dimensions.push_back(res_vocabs.size());
   point_in_cells_count_.Resize(dimensions);
   ifstream coarse_quantization_stream;
   coarse_quantization_stream.open(coarse_quantization_filename_.c_str(), ios::binary);
   if(!coarse_quantization_stream.good()) {
     throw std::logic_error("Bad input coarse quantizations stream");
   }
-  CoarseQuantization quantization(multiplicity_);
+  CoarseQuantization quantization(2);
   for(PointId pid = 0; pid < points_count; ++pid) {
     if(pid % 100000 == 0) {
       cout << pid << endl;
     }
-    for(int subspace_index = 0; subspace_index < multiplicity_; ++subspace_index) {
-      coarse_quantization_stream.read((char*)&(quantization[subspace_index]), 
-                                      sizeof(ClusterId));
-    }
+    coarse_quantization_stream.read((char*)&(quantization[0]), sizeof(ClusterId));
+    coarse_quantization_stream.read((char*)&(quantization[1]), sizeof(ClusterId));
     int cell_global_index = point_in_cells_count_.GetCellGlobalIndex(quantization);
     point_in_cells_count_.table[cell_global_index] += 1;
   }
 }
 
 template<class Record>
-void MultiIndexer<Record>::BuildMultiIndex(const string& points_filename,
-                                           const string& metainfo_filename,
-                                           const int points_count,
-                                           const vector<Centroids>& coarse_vocabs,
-                                           const vector<Centroids>& fine_vocabs,
-                                           const RerankMode& mode,
-                                           const bool build_coarse_quantization,
-                                           const string& files_prefix,
-                                           const string& coarse_quantization_filename) {
-  InitParameters<Record>(fine_vocabs, mode, metainfo_filename);
-  InitBlasStructures(coarse_vocabs);
+void Indexer<Record>::BuildHierIndex(const string& points_filename,
+                                     const string& metainfo_filename,
+                                     const int points_count,
+                                     const Centroids& main_vocabs,
+                                     const Centroids& res_vocabs,
+                                     const RerankMode& mode,
+                                     const bool build_coarse_quantization,
+                                     const string& files_prefix,
+                                     const string& coarse_quantization_filename) {
+  //InitParameters<Record>(fine_vocabs, mode, metainfo_filename);
+  //InitBlasStructures(coarse_vocabs);
   files_prefix_ = files_prefix;
   coarse_quantization_filename_ = coarse_quantization_filename;
   if(build_coarse_quantization) {
-    PrepareCoarseQuantization(points_filename, points_count, coarse_vocabs);
+    PrepareCoarseQuantization(points_filename, points_count, main_vocabs, res_vocabs);
   } else {
   RestorePointsInCellsCountFromCourseQuantization(points_filename,
                                                   points_count,
-                                                  coarse_vocabs);
+                                                  main_vocabs,
+                                                  res_vocabs);
   }
-  FillMultiIndex(points_filename, points_count, coarse_vocabs, fine_vocabs, mode);
-  cout << "Multiindex created" << endl;
-  SerializeMultiIndexFiles();
-  cout << "Multiindex serialized" << endl;
+  FillHierIndex(points_filename, points_count, main_vocabs, res_vocabs, mode);
+  cout << "Hierindex created" << endl;
+  PrecomputeEffectiveCentroidsNorms(main_vocabs, res_vocabs);
+  cout << "Norms are precomputed" << endl;
+  SerializeHierIndexFiles();
+  cout << "Hierindex serialized" << endl;
 }
 
-template<class Record>
-void MultiIndexer<Record>::InitBlasStructures(const vector<Centroids>& coarse_vocabs) {
-  coarse_vocabs_matrices_.resize(coarse_vocabs.size());
-  coarse_centroids_norms_.resize(coarse_vocabs.size(), vector<float>(coarse_vocabs[0].size()));
-  for(int coarse_id = 0; coarse_id < coarse_vocabs_matrices_.size(); ++coarse_id) {
-    coarse_vocabs_matrices_[coarse_id] = new float[coarse_vocabs[0].size() * coarse_vocabs[0][0].size()];
-    for(int i = 0; i < coarse_vocabs[0].size(); ++i) {
-      Coord norm = 0;
-      for(int j = 0; j < coarse_vocabs[0][0].size(); ++j) {
-        coarse_vocabs_matrices_[coarse_id][coarse_vocabs[0][0].size() * i + j] = coarse_vocabs[coarse_id][i][j];
-        norm += coarse_vocabs[coarse_id][i][j] * coarse_vocabs[coarse_id][i][j];
-      }
-      coarse_centroids_norms_[coarse_id][i] = norm;
-    }
-  }
-}
+//template<class Record>
+//void MultiIndexer<Record>::InitBlasStructures(const vector<Centroids>& coarse_vocabs) {
+//  coarse_vocabs_matrices_.resize(coarse_vocabs.size());
+//  coarse_centroids_norms_.resize(coarse_vocabs.size(), vector<float>(coarse_vocabs[0].size()));
+//  for(int coarse_id = 0; coarse_id < coarse_vocabs_matrices_.size(); ++coarse_id) {
+//    coarse_vocabs_matrices_[coarse_id] = new float[coarse_vocabs[0].size() * coarse_vocabs[0][0].size()];
+//    for(int i = 0; i < coarse_vocabs[0].size(); ++i) {
+//      Coord norm = 0;
+//      for(int j = 0; j < coarse_vocabs[0][0].size(); ++j) {
+//        coarse_vocabs_matrices_[coarse_id][coarse_vocabs[0][0].size() * i + j] = coarse_vocabs[coarse_id][i][j];
+//        norm += coarse_vocabs[coarse_id][i][j] * coarse_vocabs[coarse_id][i][j];
+//      }
+//      coarse_centroids_norms_[coarse_id][i] = norm;
+//    }
+//  }
+//}
 
 template<>
 inline void GetRecord<PointId> (const Point& point, const PointId pid,
