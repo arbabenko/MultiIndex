@@ -39,7 +39,7 @@ res_vocabs_count = 16384
 use_residuals = 1
 
 # should we calculate coarse quantizations?
-build_coarse = 1
+build_coarse = 0
 
 # postfix added by users to all multiindex files
 user_added_postfix = ''

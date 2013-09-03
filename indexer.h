@@ -484,6 +484,7 @@ void Indexer<Record>::RestorePointsInCellsCountFromCourseQuantization(const stri
     }
     coarse_quantization_stream.read((char*)&(quantization[0]), sizeof(ClusterId));
     coarse_quantization_stream.read((char*)&(quantization[1]), sizeof(ClusterId));
+    cout << quantization[0] << " " << quantization[1] << endl;
     int cell_global_index = point_in_cells_count_.GetCellGlobalIndex(quantization);
     point_in_cells_count_.table[cell_global_index] += 1;
   }

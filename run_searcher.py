@@ -39,10 +39,10 @@ queries_file = 'sift1B_queries.bvecs'
 gnd_file = 'sift1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 20
+queries_count = 100
 
 # number of neighbors to seek
-neighbors_count = 100
+neighbors_count = 10000
 
 # should we rerank ?
 do_rerank = 1

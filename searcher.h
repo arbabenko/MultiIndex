@@ -191,16 +191,13 @@ void Searcher<Record, MetaInfo>::DeserializeData(const string& index_files_prefi
   }
   boost::archive::binary_iarchive arc_cell_edges(cell_edges);
   arc_cell_edges >> multiindex_.cell_edges;
-  cout << "Cell edges deserialized...\n";
-  for(int i =0; i < 100000; ++i) {
-    cout << multiindex_.cell_edges.table[i] << endl;
-  }
   ifstream multi_array(string(index_files_prefix + "_multi_array.bin").c_str(), ios::binary);
   if(!multi_array.good()) {
     throw std::logic_error("Bad input multiarray stream");
   }
   boost::archive::binary_iarchive arc_multi_array(multi_array);
   arc_multi_array >> multiindex_.multiindex;
+  for (int i=0;i<16384;++i) cout << multiindex_.cell_edges.table[i] << endl;
   cout << "Multiindex deserialized...\n";
   ifstream norms(string(index_files_prefix + "_prec_norms.bin").c_str(), ios::binary);
   if(!norms.good()) {
@@ -355,7 +352,8 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
   vector<pair<float, int> > temp(main_products.size());
   for (int i = 0; i < main_vocabs_.size(); ++i) {
     main_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(main_vocabs_[i][0]), 1);
-    temp[i] = std::make_pair(main_products[i], i);
+    float norm = cblas_sdot(point.size(), &(main_vocabs_[i][0]), 1, &(main_vocabs_[i][0]), 1);
+    temp[i] = std::make_pair(norm / 2 - main_products[i], i);
   }
   
   for (int i = 0; i < res_vocabs_.size(); ++i) {
@@ -363,24 +361,24 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
   }
   std::sort(temp.begin(), temp.end());
   std::multimap<float, pair<ClusterId, ClusterId> > queue;
-  for(int i = 0; i < 16; ++i) {
+  for(int i = 0; i < main_centroids_to_consider_; ++i) {
     for(int j = 0; j < res_vocabs_.size(); ++j) {
-      int main_cluster = temp[16384-i].second;
+      int main_cluster = temp[i].second;
       float score = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
       queue.insert(std::make_pair(score, std::make_pair(main_cluster,j)));
     }
   }
   cout << "Traverse started" << endl;
   std::multimap<float, pair<ClusterId, ClusterId> >::iterator current_cell = queue.begin();
-  while(found_neghbours_count_ < k) {
+  while(found_neghbours_count_ < k && current_cell != queue.end()) {
       vector<ClusterId> quantization;
       quantization.push_back(current_cell->second.first);
       quantization.push_back(current_cell->second.second);
-      cout << quantization[0] << " " << quantization[1] << endl;
       int cell_start, cell_finish;
       GetCellEdgesInMultiIndexArray(quantization, &cell_start, &cell_finish);
       if(cell_start >= cell_finish) {
-          continue;
+         ++current_cell;
+         continue;
       }
       typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
       cell_finish = std::min((int)cell_finish, cell_start + (int)neighbours->size() - found_neghbours_count_);
