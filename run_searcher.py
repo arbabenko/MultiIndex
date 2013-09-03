@@ -21,16 +21,16 @@ prefix = 'sift1M'
 space_dim = 128
 
 # main vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 4096
 
 # res vocabs count
-fine_vocabs_count = 16384
+fine_vocabs_count = 4096
 
 # should we use residuals?
 use_residuals = 1
 
 # number of main centroids to handle
-main_centroids_count = 16
+main_centroids_count = 4096
 
 # queries file
 queries_file = 'sift1B_queries.bvecs'

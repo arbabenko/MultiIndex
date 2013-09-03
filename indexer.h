@@ -345,7 +345,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     ClusterId opt_main = 0;
     ClusterId opt_res = 0;
     float opt_distance = 999999999;
-    for(int i = 0; i < 16384; ++i) {
+    for(int i = 0; i < 1; ++i) {
     for(int j = 0; j < res_vocabs.size(); ++j) {
       int main_cluster = temp[i].second;
       float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
