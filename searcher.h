@@ -192,6 +192,9 @@ void Searcher<Record, MetaInfo>::DeserializeData(const string& index_files_prefi
   boost::archive::binary_iarchive arc_cell_edges(cell_edges);
   arc_cell_edges >> multiindex_.cell_edges;
   cout << "Cell edges deserialized...\n";
+  for(int i =0; i < 100000; ++i) {
+    cout << multiindex_.cell_edges.table[i] << endl;
+  }
   ifstream multi_array(string(index_files_prefix + "_multi_array.bin").c_str(), ios::binary);
   if(!multi_array.good()) {
     throw std::logic_error("Bad input multiarray stream");
@@ -346,6 +349,7 @@ template<class Record, class MetaInfo>
 void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
   found_neghbours_count_ = 0;
+  neighbours->resize(k);
   vector<float> main_products(main_vocabs_.size());
   vector<float> res_products(res_vocabs_.size());
   vector<pair<float, int> > temp(main_products.size());
@@ -361,7 +365,7 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
   std::multimap<float, pair<ClusterId, ClusterId> > queue;
   for(int i = 0; i < 16; ++i) {
     for(int j = 0; j < res_vocabs_.size(); ++j) {
-      int main_cluster = temp[i].second;
+      int main_cluster = temp[16384-i].second;
       float score = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
       queue.insert(std::make_pair(score, std::make_pair(main_cluster,j)));
     }
@@ -372,6 +376,7 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
       vector<ClusterId> quantization;
       quantization.push_back(current_cell->second.first);
       quantization.push_back(current_cell->second.second);
+      cout << quantization[0] << " " << quantization[1] << endl;
       int cell_start, cell_finish;
       GetCellEdgesInMultiIndexArray(quantization, &cell_start, &cell_finish);
       if(cell_start >= cell_finish) {

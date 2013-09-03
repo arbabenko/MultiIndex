@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_master'
+build_folder = './build_hier'
 
 
 # Folder with BigAnn base
@@ -14,26 +14,23 @@ bigann_root = '/sata/ResearchData/BigAnn'
 # input query point type (BVEC or FVEC)
 query_input_type = 'BVEC'
 
-# Multi-1 or Multi-2 or Multi-4
-multiplicity = 1
-
 # prefix of all vocabs, coarse quantizations, etc.
 prefix = 'sift1M'
 
 # dimension of input space
 space_dim = 128
 
-# coarse vocabs size
+# main vocabs size
 coarse_vocabs_size = 16384
 
-# fine vocabs count
-fine_vocabs_count = 8
+# res vocabs count
+fine_vocabs_count = 16384
 
 # should we use residuals?
 use_residuals = 1
 
-# number of centroids handled in each subdimension
-subspace_centroids_count = 1024
+# number of main centroids to handle
+main_centroids_count = 1024
 
 # queries file
 queries_file = 'sift1B_queries.bvecs'
@@ -45,7 +42,7 @@ gnd_file = 'sift1M_groundtruth.ivecs'
 queries_count = 20
 
 # number of neighbors to seek
-neighbors_count = 10000
+neighbors_count = 100
 
 # should we rerank ?
 do_rerank = 1
@@ -55,13 +52,13 @@ user_added_postfix = ''
 
 ##################################################
 
-multiplicity_extension = ''
-if multiplicity == 1:
-    multiplicity_extension = 'single'
-if multiplicity == 2:
-    multiplicity_extension = 'double'
-if multiplicity == 4:
-    multiplicity_extension = 'quad'
+multiplicity_extension = 'hier'
+#if multiplicity == 1:
+#    multiplicity_extension = 'single'
+#if multiplicity == 2:
+#    multiplicity_extension = 'double'
+#if multiplicity == 4:
+#    multiplicity_extension = 'quad'
 
 coarse_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '.dat'
 fine_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '.dat'
@@ -76,12 +73,12 @@ report_filename = build_folder + '/' + launch_time + '/report'
 launch_line = build_folder + '/' + launch_time + '/searcher_tester '
 launch_line = launch_line + '--queries_file=' + bigann_root + '/bases/' + queries_file + ' '
 launch_line = launch_line + '--groundtruth_file=' + bigann_root + '/gnd/' + gnd_file + ' '
-launch_line = launch_line + '--coarse_vocabs_file=' + bigann_root + '/coarse_vocabs/' + coarse_vocabs_filename + ' '
-launch_line = launch_line + '--fine_vocabs_file=' + bigann_root + '/fine_vocabs/' + fine_vocabs_filename + ' '
+launch_line = launch_line + '--main_vocabs_file=' + bigann_root + '/coarse_vocabs/' + coarse_vocabs_filename + ' '
+launch_line = launch_line + '--res_vocabs_file=' + bigann_root + '/fine_vocabs/' + fine_vocabs_filename + ' '
 launch_line = launch_line + '--query_point_type=' + query_input_type + ' '
 launch_line = launch_line + '--queries_count=' + str(queries_count) + ' '
 launch_line = launch_line + '--neighbours_count=' + str(neighbors_count) + ' '
-launch_line = launch_line + '--subspaces_centroids_count=' + str(subspace_centroids_count) + ' '
+launch_line = launch_line + '--main_centroids_count=' + str(main_centroids_count) + ' '
 launch_line = launch_line + '--space_dim=' + str(space_dim) + ' '
 launch_line = launch_line + '--index_files_prefix=' + bigann_root + '/indices/' + filename_prefix + ' '
 launch_line = launch_line + '--report_file=' + report_filename + ' ' 
