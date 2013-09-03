@@ -331,15 +331,15 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     Point current_point;
     ReadPoint(point_stream, &current_point);
     ////// GETTING QUANTIZATIONS
-    vector<float> main_products(main_vocabs.size());
-    vector<float> res_products(res_vocabs.size());
+    vector<float> main_products(main_vocabs_.size());
+    vector<float> res_products(res_vocabs_.size());
     vector<pair<float, int> > temp(main_products.size());
     for (int i = 0; i < main_vocabs_.size(); ++i) {
-      main_products[i] = cblas_sdot(point.size(), &(current_point[0]), 1, &(main_vocabs[i][0]), 1);
+      main_products[i] = cblas_sdot(point.size(), &(current_point[0]), 1, &(main_vocabs_[i][0]), 1);
       temp[i] = std::make_pair(main_norms_[i] / 2 - main_products[i], i);
     }
     for (int i = 0; i < res_vocabs_.size(); ++i) {
-      res_products[i] = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(res_vocabs[i][0]), 1);
+      res_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(res_vocabs_[i][0]), 1);
     }
     std::sort(temp.begin(), temp.end());
     ClusterId opt_main = 0;
