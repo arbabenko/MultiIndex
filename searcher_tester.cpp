@@ -172,6 +172,8 @@ int main(int argc, char** argv) {
   ReadPoints<int, PointId>(groundtruth_file, &groundtruth, queries_count);
   MKL_Set_Num_Threads(1);
   cout << "Groundtruth is read ...\n";
+  Searcher<RerankADC8, PointId> searcher;
+  TestSearcher<Searcher<RerankADC8, PointId> > (searcher, queries, groundtruth);
   //vector<Centroids> fine_vocabs;
   //ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
   //if(fine_vocabs.size() == 8) {
