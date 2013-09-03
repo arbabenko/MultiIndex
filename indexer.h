@@ -276,7 +276,7 @@ void Indexer<Record>::SerializeCoarseQuantizations(const vector<vector<ClusterId
   if(!quantizations_stream.good()) {
     throw std::logic_error("Bad input stream");
   }
-  cout << "Writing coarse quantizations started" << endl;
+  cout << "Writing coarse quantizations started " << filename << endl;
   for(PointId pid = 0; pid < transposed_coarse_quantizations[0].size(); ++pid) {
     for(int index = 0; index < transposed_coarse_quantizations.size(); ++index) {
       ClusterId quantization = transposed_coarse_quantizations[index][pid];
@@ -324,7 +324,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     }
     Point current_point;
     ReadPoint(point_stream, &current_point);
-    ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
+    ClusterId nearest = GetNearestcd ..ClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
     Point residual;
     GetResidual(current_point, main_vocabs[nearest], &residual);
     ClusterId res_nearest = GetNearestClusterId(residual, res_vocabs, 0, current_point.size() - 1);

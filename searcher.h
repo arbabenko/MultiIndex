@@ -345,6 +345,7 @@ void Searcher<Record, MetaInfo>::GetCellEdgesInMultiIndexArray(const vector<int>
 template<class Record, class MetaInfo>
 void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
+  found_neghbours_count_ = 0;
   vector<float> main_products(main_vocabs_.size());
   vector<float> res_products(res_vocabs_.size());
   vector<pair<float, int> > temp(main_products.size());
