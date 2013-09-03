@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
   Indexer<RerankADC8> indexer;
   indexer.BuildHierIndex(points_file, metainfo_file, points_count,
                          main_vocabs, res_vocabs, mode,
-                         build_coarse_quantizations, files_prefix);
+                         build_coarse_quantizations, files_prefix,
+                         coarse_quantizations_file);
   return 0;
 }
