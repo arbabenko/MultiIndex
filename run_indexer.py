@@ -6,13 +6,10 @@ import sys
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_master'
+build_folder = './build_hier'
 
 # number of threads to use (max = 32)
 threads_count = 32
-
-# Multi-1 or Multi-2 or Multi-4
-multiplicity = 1
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'
@@ -32,13 +29,13 @@ points_count = 1000000
 # dimension of input space
 space_dim = 128
 
-# coarse vocabs size
-coarse_vocabs_size = 16384
+# main vocabs size
+main_vocabs_size = 16384
 
-# fine vocabs count
-fine_vocabs_count = 8
+# residual vocabs count
+res_vocabs_count = 16384
 
-# should we use residuals?
+# should we use residuals for reranking
 use_residuals = 1
 
 # should we calculate coarse quantizations?
@@ -49,18 +46,18 @@ user_added_postfix = ''
 
 ##################################################
 
-multiplicity_extension = ''
-if multiplicity == 1:
-    multiplicity_extension = 'single'
-if multiplicity == 2:
-    multiplicity_extension = 'double'
-if multiplicity == 4:
-    multiplicity_extension = 'quad'
+multiplicity_extension = 'hier'
+#if multiplicity == 1:
+#    multiplicity_extension = 'single'
+#if multiplicity == 2:
+#    multiplicity_extension = 'double'
+#if multiplicity == 4:
+#    multiplicity_extension = 'quad'
 
-coarse_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '.dat'
-fine_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '.dat'
-filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + user_added_postfix
-coarse_quantization_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + user_added_postfix + '_coarse_quantizations.bin'
+main_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '.dat'
+res_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '_' + str(res_vocabs_count) + '.dat'
+filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '_' + str(res_vocabs_count) + user_added_postfix
+coarse_quantization_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + user_added_postfix + '_coarse_quantizations.bin'
 
 launch_time = datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 os.system('mkdir -p ' + build_folder + '/' + launch_time)
@@ -69,10 +66,9 @@ os.system('cp run_indexer.py ' + build_folder + '/' + launch_time)
 
 launch_line = build_folder + '/' + launch_time + '/indexer_launcher '
 launch_line = launch_line + '--threads_count=' + str(threads_count) + ' '
-launch_line = launch_line + '--multiplicity=' + str(multiplicity) + ' '
 launch_line = launch_line + '--points_file=' + bigann_root + '/bases/' + points_file + ' '
-launch_line = launch_line + '--coarse_vocabs_file=' + bigann_root + '/coarse_vocabs/' + coarse_vocabs_filename + ' '
-launch_line = launch_line + '--fine_vocabs_file=' + bigann_root + '/fine_vocabs/' + fine_vocabs_filename + ' '
+launch_line = launch_line + '--main_vocabs_file=' + bigann_root + '/coarse_vocabs/' + main_vocabs_filename + ' '
+launch_line = launch_line + '--res_vocabs_file=' + bigann_root + '/fine_vocabs/' + res_vocabs_filename + ' '
 launch_line = launch_line + '--input_point_type=' + input_type + ' '
 launch_line = launch_line + '--points_count=' + str(points_count) + ' '
 launch_line = launch_line + '--space_dim=' + str(space_dim) + ' '
