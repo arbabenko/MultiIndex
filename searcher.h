@@ -347,19 +347,25 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
   vector<float> main_products(main_vocabs_.size());
   vector<float> res_products(res_vocabs_.size());
+  vector<pair<float, int> > temp(main_products.size());
   for (int i = 0; i < main_vocabs_.size(); ++i) {
     main_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(main_vocabs_[i][0]), 1);
+    temp[i] = std::make_pair(main_products[i], i);
   }
+  
   for (int i = 0; i < res_vocabs_.size(); ++i) {
     res_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(res_vocabs_[i][0]), 1);
   }
+  std::sort(temp.begin(), temp.end());
   std::multimap<float, pair<ClusterId, ClusterId> > queue;
-  for(int i = 0; i < main_vocabs_.size(); ++i) {
+  for(int i = 0; i < 16; ++i) {
     for(int j = 0; j < res_vocabs_.size(); ++j) {
-      float score = precomputed_norms_[i][j] - 2 * main_products[i] - 2 * res_products[j];
-      queue.insert(std::make_pair(score, std::make_pair(i,j)));
+      int main_cluster = temp[i].second;
+      float score = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
+      queue.insert(std::make_pair(score, std::make_pair(main_cluster,j)));
     }
   }
+  cout << "Traverse started" << endl;
   std::multimap<float, pair<ClusterId, ClusterId> >::iterator current_cell = queue.begin();
   while(found_neghbours_count_ < k) {
       vector<ClusterId> quantization;
