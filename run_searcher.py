@@ -15,7 +15,7 @@ bigann_root = '/sata/ResearchData/BigAnn'
 query_input_type = 'BVEC'
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 1
+multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
 prefix = 'sift1M'
@@ -24,7 +24,7 @@ prefix = 'sift1M'
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 4096
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -42,13 +42,13 @@ queries_file = 'sift1B_queries.bvecs'
 gnd_file = 'sift1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 20
+queries_count = 1000
 
 # number of neighbors to seek
 neighbors_count = 10000
 
 # should we rerank ?
-do_rerank = 1
+do_rerank = 0
 
 # postfix added by users to all multiindex files
 user_added_postfix = ''

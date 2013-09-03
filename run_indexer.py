@@ -12,7 +12,7 @@ build_folder = './build_master'
 threads_count = 32
 
 # Multi-1 or Multi-2 or Multi-4
-multiplicity = 1
+multiplicity = 2
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'
@@ -33,7 +33,7 @@ points_count = 1000000
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 4096
 
 # fine vocabs count
 fine_vocabs_count = 8
