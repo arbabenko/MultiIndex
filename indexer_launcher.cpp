@@ -20,13 +20,13 @@ PointType point_type;
  */
 Dimensions SPACE_DIMENSION;
 /**
- * File with vocabularies for multiindex structure
+ * File with vocabularies for main centroids
  */
-string coarse_vocabs_file;
+string main_vocabs_file;
 /**
- * File with vocabularies for reranking
+ * File with vocabularies for residuals
  */
-string fine_vocabs_file;
+string res_vocabs_file;
 /**
  * File with points to index
  */
@@ -55,20 +55,15 @@ string coarse_quantizations_file;
  * How many points should we index
  */
 int points_count;
-/**
- * Multiplicity of multiindex
- */
-int multiplicity;
 
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
   description.add_options()
     ("threads_count,t", value<int>())
-    ("multiplicity,m", value<int>())
     ("points_file,p", value<string>())
     ("metainfo_file,z", value<string>())
-    ("coarse_vocabs_file,c", value<string>())
-    ("fine_vocabs_file,f", value<string>())
+    ("main_vocabs_file,c", value<string>())
+    ("res_vocabs_file,f", value<string>())
     ("input_point_type,i", value<string>())
     ("build_coarse,b", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
@@ -99,11 +94,10 @@ int SetOptions(int argc, char** argv) {
   }
 
   THREADS_COUNT =              name_to_value["threads_count"].as<int>();
-  multiplicity =               name_to_value["multiplicity"].as<int>();
   points_file =                name_to_value["points_file"].as<string>();
   metainfo_file =              name_to_value["metainfo_file"].as<string>();
-  coarse_vocabs_file =         name_to_value["coarse_vocabs_file"].as<string>();
-  fine_vocabs_file =           name_to_value["fine_vocabs_file"].as<string>();
+  main_vocabs_file =           name_to_value["main_vocabs_file"].as<string>();
+  res_vocabs_file =            name_to_value["res_vocabs_file"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   files_prefix =               name_to_value["files_prefix"].as<string>();
   points_count =               name_to_value["points_count"].as<int>();
@@ -125,21 +119,14 @@ int SetOptions(int argc, char** argv) {
 int main(int argc, char** argv) {
   SetOptions(argc, argv);
   cout << "Options are set ...\n";
-  vector<Centroids> coarse_vocabs;
-  vector<Centroids> fine_vocabs;
-  ReadVocabularies<float>(coarse_vocabs_file, SPACE_DIMENSION, &coarse_vocabs);
-  ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
+  Centroids main_vocabs;
+  Centroids res_vocabs;
+  ReadCentroids<float>(main_vocabs_file, SPACE_DIMENSION, &main_vocabs);
+  ReadCentroids<float>(res_vocabs_file, SPACE_DIMENSION, &res_vocabs);
   cout << "Vocs are read ...\n";
-  if(fine_vocabs.size() == 8) {
-    MultiIndexer<RerankADC8> indexer(multiplicity);
-    indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
-                            fine_vocabs, mode, build_coarse_quantizations,
-                            files_prefix, coarse_quantizations_file);
-  } else if(fine_vocabs.size() == 16) {
-    MultiIndexer<RerankADC16> indexer(multiplicity);
-    indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
-                            fine_vocabs, mode, build_coarse_quantizations,
-                            files_prefix, coarse_quantizations_file);  
-  }
+  Indexer<RerankADC8> indexer;
+  indexer.BuildHierIndex(points_file, metainfo_file, points_count,
+                         main_vocabs, res_vocabs, mode,
+                         build_coarse_quantizations, files_prefix);
   return 0;
 }
