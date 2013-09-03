@@ -324,7 +324,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     }
     Point current_point;
     ReadPoint(point_stream, &current_point);
-    ClusterId nearest = GetNearestcd ..ClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
+    ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
     Point residual;
     GetResidual(current_point, main_vocabs[nearest], &residual);
     ClusterId res_nearest = GetNearestClusterId(residual, res_vocabs, 0, current_point.size() - 1);
