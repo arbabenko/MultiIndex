@@ -206,6 +206,8 @@ class Indexer {
   */
   boost::mutex cell_counts_mutex_;
 
+  vector<float> main_norms_;
+
   vector<vector<float> > precomputed_norms_;
 };
 
@@ -254,6 +256,10 @@ void Indexer<Record>::ReadPoint(ifstream& input, Point* point) {
 template<class Record>
 void Indexer<Record>::PrecomputeEffectiveCentroidsNorms(const Centroids& main_vocabs,
                                                         const Centroids& res_vocabs) {
+    main_norms_.resize(main_vocabs.size());
+    for(int i = 0; i < main_vocabs.size(); ++i) {
+      main_norms_[i] = cblas_sdot(main_vocabs[i].size(), &(main_vocabs[i][0]), 1, &(main_vocabs[i][0]), 1);
+    }
     precomputed_norms_.resize(main_vocabs.size());
     for(int i = 0; i < main_vocabs.size(); ++i) {
         precomputed_norms_[i].resize(res_vocabs.size());
@@ -319,19 +325,50 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
   point_stream.seekg(start_pid * (GetInputCoordSizeof() * SPACE_DIMENSION + sizeof(Dimensions)), ios::beg);
   vector<ClusterId> coarse_quantization(2);
   for(int point_number = 0; point_number < subset_size; ++point_number) {
-    if(point_number % 10000 == 0) {
+    if(point_number % 1000 == 0) {
       cout << "Getting coarse quantization, point # " << start_pid + point_number << endl;
     }
     Point current_point;
     ReadPoint(point_stream, &current_point);
-    ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
-    Point residual;
-    GetResidual(current_point, main_vocabs[nearest], &residual);
-    ClusterId res_nearest = GetNearestClusterId(residual, res_vocabs, 0, current_point.size() - 1);
-    transposed_coarse_quantizations->at(0)[start_pid + point_number] = nearest;
-    coarse_quantization[0] = nearest;
-    transposed_coarse_quantizations->at(1)[start_pid + point_number] = res_nearest;
-    coarse_quantization[1] = res_nearest;
+    ////// GETTING QUANTIZATIONS
+    vector<float> main_products(main_vocabs_.size());
+    vector<float> res_products(res_vocabs_.size());
+    vector<pair<float, int> > temp(main_products.size());
+    for (int i = 0; i < main_vocabs_.size(); ++i) {
+      main_products[i] = cblas_sdot(point.size(), &(current_point[0]), 1, &(main_vocabs_[i][0]), 1);
+      temp[i] = std::make_pair(main_norms_[i] / 2 - main_products[i], i);
+    }
+    for (int i = 0; i < res_vocabs_.size(); ++i) {
+      res_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(res_vocabs_[i][0]), 1);
+    }
+    std::sort(temp.begin(), temp.end());
+    ClusterId opt_main = 0;
+    ClusterId opt_res = 0;
+    float opt_distance = 99999999;
+    for(int i = 0; i < 16; ++i) {
+    for(int j = 0; j < res_vocabs_.size(); ++j) {
+      int main_cluster = temp[i].second;
+      float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
+      if(distance < opt_distance) {
+        opt_main = main_cluster;
+        opt_res = j;
+        opt_distance = distance;
+      }
+    }
+  }
+    transposed_coarse_quantizations->at(0)[start_pid + point_number] = opt_main;
+    coarse_quantization[0] = opt_main;
+    transposed_coarse_quantizations->at(1)[start_pid + point_number] = opt_res;
+    coarse_quantization[1] = opt_res;
+    //////
+    //ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
+    //Point residual;
+    //GetResidual(current_point, main_vocabs[nearest], &residual);
+    //ClusterId res_nearest = GetNearestClusterId(residual, res_vocabs, 0, current_point.size() - 1);
+    //transposed_coarse_quantizations->at(0)[start_pid + point_number] = nearest;
+    //coarse_quantization[0] = nearest;
+    //transposed_coarse_quantizations->at(1)[start_pid + point_number] = res_nearest;
+    //coarse_quantization[1] = res_nearest;
     int global_index = point_in_cells_count_.GetCellGlobalIndex(coarse_quantization);
     cell_counts_mutex_.lock();
     ++(point_in_cells_count_.table[global_index]);
@@ -504,6 +541,8 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
   //InitBlasStructures(coarse_vocabs);
   files_prefix_ = files_prefix;
   coarse_quantization_filename_ = coarse_quantization_filename;
+  PrecomputeEffectiveCentroidsNorms(main_vocabs, res_vocabs);
+  cout << "Norms are precomputed" << endl;
   if(build_coarse_quantization) {
     PrepareCoarseQuantization(points_filename, points_count, main_vocabs, res_vocabs);
   } else {
@@ -514,8 +553,6 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
   }
   FillHierIndex(points_filename, points_count, main_vocabs, res_vocabs, mode);
   cout << "Hierindex created" << endl;
-  PrecomputeEffectiveCentroidsNorms(main_vocabs, res_vocabs);
-  cout << "Norms are precomputed" << endl;
   SerializeHierIndexFiles();
   cout << "Hierindex serialized" << endl;
 }
