@@ -308,6 +308,8 @@ void Indexer<Record>::SerializeHierIndexFiles() {
   cout << "Finish hierindex serializing....\n";
 }
 
+std::ofstream dist("distor_hier.txt");
+
 template<class Record>
 void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filename,
                                                       const int start_pid,
@@ -345,7 +347,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     ClusterId opt_main = 0;
     ClusterId opt_res = 0;
     float opt_distance = 999999999;
-    for(int i = 0; i < 1; ++i) {
+    for(int i = 0; i < 4096; ++i) {
     for(int j = 0; j < res_vocabs.size(); ++j) {
       int main_cluster = temp[i].second;
       float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
@@ -360,6 +362,9 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     coarse_quantization[0] = opt_main;
     transposed_coarse_quantizations->at(1)[start_pid + point_number] = opt_res;
     coarse_quantization[1] = opt_res;
+    cblas_saxpy(current_point.size(), -1,&(main_vocabs[opt_main][0]), 1, &(current_point[0]), 1);
+    cblas_saxpy(current_point.size(), -1,&(res_vocabs[opt_res][0]), 1, &(current_point[0]), 1);
+    float distors = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
     //////
     //ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
     //Point residual;
@@ -371,6 +376,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     //coarse_quantization[1] = res_nearest;
     int global_index = point_in_cells_count_.GetCellGlobalIndex(coarse_quantization);
     cell_counts_mutex_.lock();
+    dist << distors << std::endl;
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }

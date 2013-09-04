@@ -30,10 +30,10 @@ points_count = 1000000
 space_dim = 128
 
 # main vocabs size
-main_vocabs_size = 16384
+main_vocabs_size = 4096
 
 # residual vocabs count
-res_vocabs_count = 16384
+res_vocabs_count = 4096
 
 # should we use residuals for reranking
 use_residuals = 1
