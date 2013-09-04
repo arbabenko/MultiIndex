@@ -208,6 +208,8 @@ class Indexer {
 
   vector<float> main_norms_;
 
+  vector<float> res_norms_;
+
   vector<vector<float> > precomputed_norms_;
 };
 
@@ -260,12 +262,16 @@ void Indexer<Record>::PrecomputeEffectiveCentroidsNorms(const Centroids& main_vo
     for(int i = 0; i < main_vocabs.size(); ++i) {
       main_norms_[i] = cblas_sdot(main_vocabs[i].size(), &(main_vocabs[i][0]), 1, &(main_vocabs[i][0]), 1);
     }
+    res_norms_.resize(res_vocabs.size());
+    for(int i = 0; i < res_vocabs.size(); ++i) {
+      res_norms_[i] = cblas_sdot(res_vocabs[i].size(), &(res_vocabs[i][0]), 1, &(res_vocabs[i][0]), 1);
+    }
     precomputed_norms_.resize(main_vocabs.size());
     for(int i = 0; i < main_vocabs.size(); ++i) {
         precomputed_norms_[i].resize(res_vocabs.size());
         for(int j = 0; j < res_vocabs.size(); ++j) {
-            Point temp(main_vocabs[0].size());
-            cblas_saxpy(temp.size(), 1, &(main_vocabs[i][0]), 1, &(temp[0]), 1);
+            Point temp = main_vocabs[i];
+            //cblas_saxpy(temp.size(), 1, &(main_vocabs[i][0]), 1, &(temp[0]), 1);
             cblas_saxpy(temp.size(), 1, &(res_vocabs[j][0]), 1, &(temp[0]), 1);
             precomputed_norms_[i][j] = cblas_sdot(temp.size(), &(temp[0]), 1, &(temp[0]), 1);
         }
@@ -305,6 +311,12 @@ void Indexer<Record>::SerializeHierIndexFiles() {
   ofstream norms(string(files_prefix_ + "_prec_norms.bin").c_str(), ios::binary);
   boost::archive::binary_oarchive arc_norms(norms);
   arc_norms << precomputed_norms_;
+  ofstream main_norms(string(files_prefix_ + "_main_norms.bin").c_str(), ios::binary);
+  boost::archive::binary_oarchive arc_main_norms(main_norms);
+  arc_main_norms << main_norms_;
+  ofstream res_norms(string(files_prefix_ + "_res_norms.bin").c_str(), ios::binary);
+  boost::archive::binary_oarchive arc_res_norms(res_norms);
+  arc_res_norms << res_norms_;
   cout << "Finish hierindex serializing....\n";
 }
 
@@ -340,31 +352,44 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
       main_products[i] = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(main_vocabs[i][0]), 1);
       temp[i] = std::make_pair(main_norms_[i] / 2 - main_products[i], i);
     }
-    for (int i = 0; i < res_vocabs.size(); ++i) {
-      res_products[i] = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(res_vocabs[i][0]), 1);
-    }
     std::sort(temp.begin(), temp.end());
+    ClusterId opt = temp[0].second;
+    //cout << "Coarse dist " << cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1) + 2 * temp[0].first << endl;
+    /*Point res = current_point;
+    cblas_saxpy(res.size(), -1, &(main_vocabs[opt][0]), 1, &(res[0]), 1);
+    for (int i = 0; i < res_vocabs.size(); ++i) {
+      res_products[i] = cblas_sdot(res.size(), &(res[0]), 1, &(res_vocabs[i][0]), 1);
+      temp[i] = std::make_pair(res_norms_[i] / 2 - res_products[i], i);
+    }
+    std::sort(temp.begin(), temp.end());*/
     ClusterId opt_main = 0;
     ClusterId opt_res = 0;
+    //cout << "Fine dist " << cblas_sdot(res.size(), &(res[0]), 1, &(res[0]), 1) + 2 * temp[0].first << endl;
+
     float opt_distance = 999999999;
-    for(int i = 0; i < 4096; ++i) {
-    for(int j = 0; j < res_vocabs.size(); ++j) {
-      int main_cluster = temp[i].second;
-      float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
-      if(distance < opt_distance) {
-        opt_main = main_cluster;
-        opt_res = j;
-        opt_distance = distance;
+    for(int i = 0; i < 2; ++i) {
+      for(int j = 0; j < res_vocabs.size(); ++j) {
+        int main_cluster = temp[i].second;
+        //float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
+        Point temp = current_point;
+        cblas_saxpy(temp.size(), -1, &(main_vocabs[main_cluster][0]), 1, &(temp[0]), 1);
+        cblas_saxpy(temp.size(), -1, &(res_vocabs[j][0]), 1, &(temp[0]), 1);
+        float distance = cblas_sdot(temp.size(), &(temp[0]), 1, &(temp[0]), 1);
+        if(distance < opt_distance) {
+          opt_main = main_cluster;
+          opt_res = j;
+          opt_distance = distance;
+        }
       }
     }
-  }
     transposed_coarse_quantizations->at(0)[start_pid + point_number] = opt_main;
     coarse_quantization[0] = opt_main;
     transposed_coarse_quantizations->at(1)[start_pid + point_number] = opt_res;
     coarse_quantization[1] = opt_res;
     cblas_saxpy(current_point.size(), -1,&(main_vocabs[opt_main][0]), 1, &(current_point[0]), 1);
+    float distors1 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
     cblas_saxpy(current_point.size(), -1,&(res_vocabs[opt_res][0]), 1, &(current_point[0]), 1);
-    float distors = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
+    float distors2 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
     //////
     //ClusterId nearest = GetNearestClusterId(current_point, main_vocabs, 0, current_point.size() - 1);
     //Point residual;
@@ -376,7 +401,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     //coarse_quantization[1] = res_nearest;
     int global_index = point_in_cells_count_.GetCellGlobalIndex(coarse_quantization);
     cell_counts_mutex_.lock();
-    dist << distors << std::endl;
+    dist << distors1 << " " << distors2 << std::endl;
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }

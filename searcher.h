@@ -197,7 +197,7 @@ void Searcher<Record, MetaInfo>::DeserializeData(const string& index_files_prefi
   }
   boost::archive::binary_iarchive arc_multi_array(multi_array);
   arc_multi_array >> multiindex_.multiindex;
-  for (int i=0;i<16384;++i) cout << multiindex_.cell_edges.table[i] << endl;
+  //for (int i=0;i<16384;++i) cout << multiindex_.cell_edges.table[i] << endl;
   cout << "Multiindex deserialized...\n";
   ifstream norms(string(index_files_prefix + "_prec_norms.bin").c_str(), ios::binary);
   if(!norms.good()) {

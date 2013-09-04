@@ -30,7 +30,7 @@ fine_vocabs_count = 4096
 use_residuals = 1
 
 # number of main centroids to handle
-main_centroids_count = 4096
+main_centroids_count = 64
 
 # queries file
 queries_file = 'sift1B_queries.bvecs'
@@ -39,7 +39,7 @@ queries_file = 'sift1B_queries.bvecs'
 gnd_file = 'sift1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 50
+queries_count = 1000
 
 # number of neighbors to seek
 neighbors_count = 10000
