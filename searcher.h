@@ -294,15 +294,15 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
          continue;
       }
       Point residual = point;
-      cblas_saxpy(point.size(), -1, &(main_vocabs_[quantization[0]][0]), 1, &(point[0]), 1);
-      cblas_saxpy(point.size(), -1, &(res_vocabs_[quantization[1]][0]), 1, &(point[0]), 1);
+      cblas_saxpy(point.size(), -1, &(main_vocabs_[quantization[0]][0]), 1, &(residual[0]), 1);
+      cblas_saxpy(point.size(), -1, &(res_vocabs_[quantization[1]][0]), 1, &(residual[0]), 1);
       typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
       cell_finish = std::min((int)cell_finish, cell_start + (int)neighbours->size() - found_neghbours_count_);
       for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
         
         Record record = multiindex_.multiindex[array_index];
-        neighbours->at(found_neghbours_count_).second = record.pid;
-        
+        RecordToMetainfoAndDistance<Record, MetaInfo>(residual, record, rerank_vocabs_,
+                                                      &(neighbours->at(found_neghbours_count_)));
         ++found_neghbours_count_;
       }
       ++current_cell;
@@ -318,10 +318,10 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
                                                              const vector<Centroids>& rerank_vocabs,
                                                              pair<Distance, PointId>* result) {
   result->second = record.pid;
-  int rerank_vocabs_count = fine_vocabs.size();
+  int rerank_vocabs_count = rerank_vocabs.size();
   int subvectors_dim = SPACE_DIMENSION / rerank_vocabs_count;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  for(int rerank_index = 0; rerank_index < fine_clusters_count; ++rerank_index) {
+  for(int rerank_index = 0; rerank_index < rerank_vocabs_count; ++rerank_index) {
     int start_dim = rerank_index * subvectors_dim;
     int final_dim = start_dim + subvectors_dim;
     FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
@@ -340,10 +340,10 @@ inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Coord* point
                                                               const vector<Centroids>& rerank_vocabs,
                                                               pair<Distance, PointId>* result) {
   result->second = record.pid;
-  int rerank_vocabs_count = fine_vocabs.size();
+  int rerank_vocabs_count = rerank_vocabs.size();
   int subvectors_dim = SPACE_DIMENSION / rerank_vocabs_count;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  for(int rerank_index = 0; rerank_index < fine_clusters_count; ++rerank_index) {
+  for(int rerank_index = 0; rerank_index < rerank_vocabs_count; ++rerank_index) {
     int start_dim = rerank_index * subvectors_dim;
     int final_dim = start_dim + subvectors_dim;
     FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
