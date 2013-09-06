@@ -367,7 +367,7 @@ void Indexer<Record>::GetCoarseQuantizationsForSubset(const string& points_filen
     //cout << "Fine dist " << cblas_sdot(res.size(), &(res[0]), 1, &(res[0]), 1) + 2 * temp[0].first << endl;
 
     float opt_distance = 999999999;
-    for(int i = 0; i < 2; ++i) {
+    for(int i = 0; i < 8; ++i) {
       for(int j = 0; j < res_vocabs.size(); ++j) {
         int main_cluster = temp[i].second;
         //float distance = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
