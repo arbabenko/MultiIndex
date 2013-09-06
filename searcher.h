@@ -139,7 +139,7 @@ class Searcher {
 };
 
 template<class Record, class MetaInfo>
-inline void RecordToMetainfoAndDistance(const Coord* point,
+inline void RecordToMetainfoAndDistance(const Point& point,
                                         const Record& record,
                                         const vector<Centroids>& rerank_vocabs,
                                         pair<Distance, MetaInfo>* result) {
@@ -314,7 +314,7 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
 }
 
 template<>
-inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point, const RerankADC8& record,
+inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Point& point, const RerankADC8& record,
                                                              const vector<Centroids>& rerank_vocabs,
                                                              pair<Distance, PointId>* result) {
   result->second = record.pid;
@@ -328,7 +328,7 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
     rerank_info_ptr += sizeof(FineClusterId);
     Distance subvector_distance = 0;
     for(int i = start_dim; i < final_dim; ++i) {
-      Coord diff = fine_vocabs[rerank_index][pid_nearest_centroid][i - start_dim] - point[i];
+      Coord diff = rerank_vocabs[rerank_index][pid_nearest_centroid][i - start_dim] - point[i];
       subvector_distance += diff * diff;
     }
     result->first += subvector_distance;
@@ -336,7 +336,7 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
 }
 
 template<>
-inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Coord* point, const RerankADC16& record,
+inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Point& point, const RerankADC16& record,
                                                               const vector<Centroids>& rerank_vocabs,
                                                               pair<Distance, PointId>* result) {
   result->second = record.pid;
@@ -350,7 +350,7 @@ inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Coord* point
     rerank_info_ptr += sizeof(FineClusterId);
     Distance subvector_distance = 0;
     for(int i = start_dim; i < final_dim; ++i) {
-      Coord diff = fine_vocabs[rerank_index][pid_nearest_centroid][i - start_dim] - point[i];
+      Coord diff = rerank_vocabs[rerank_index][pid_nearest_centroid][i - start_dim] - point[i];
       subvector_distance += diff * diff;
     }
     result->first += subvector_distance;
