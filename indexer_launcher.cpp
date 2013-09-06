@@ -46,15 +46,19 @@ string files_prefix;
 /**
  * Should we calculate coarse quantizations (they can be precomputed)
  */
-bool build_coarse_quantizations;
+bool build_quantizations;
 /**
  * File with points coarse quantizations
  */
-string coarse_quantizations_file;
+string quantizations_file;
 /**
  * How many points should we index
  */
 int points_count;
+/**
+ * Number of main centroids to handle for indexing
+ */
+int main_centroids_count;
 
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
@@ -65,11 +69,12 @@ int SetOptions(int argc, char** argv) {
     ("main_vocabs_file,c", value<string>())
     ("res_vocabs_file,f", value<string>())
     ("input_point_type,i", value<string>())
-    ("build_coarse,b", bool_switch(), "Flag B")
+    ("build_quantizations,b", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
     ("points_count,p", value<int>())
-    ("coarse_quantization_file,q", value<string>())
+    ("quantization_file,q", value<string>())
     ("space_dim,d", value<int>())
+    ("main_centroids_count,s", value<int>())
     ("files_prefix,_", value<string>());
   variables_map name_to_value;
   try {
@@ -101,12 +106,13 @@ int SetOptions(int argc, char** argv) {
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   files_prefix =               name_to_value["files_prefix"].as<string>();
   points_count =               name_to_value["points_count"].as<int>();
+  main_centroids_count =       name_to_value["main_centroids_count"].as<int>();
  
-  build_coarse_quantizations = (name_to_value["build_coarse"].as<bool>() == true) ? true : false;
+  build_quantizations = (name_to_value["build_quantizations"].as<bool>() == true) ? true : false;
   mode = name_to_value["use_residuals"].as<bool>() == true ? USE_RESIDUALS : USE_INIT_POINTS;
 
-  if (name_to_value.find("coarse_quantization_file") != name_to_value.end()) {
-    coarse_quantizations_file =  name_to_value["coarse_quantization_file"].as<string>();
+  if (name_to_value.find("quantization_file") != name_to_value.end()) {
+    quantizations_file =  name_to_value["quantization_file"].as<string>();
   }
   if (name_to_value["input_point_type"].as<string>() == "FVEC") {
     point_type = FVEC;
@@ -127,7 +133,7 @@ int main(int argc, char** argv) {
   Indexer<RerankADC8> indexer;
   indexer.BuildHierIndex(points_file, metainfo_file, points_count,
                          main_vocabs, res_vocabs, mode,
-                         build_coarse_quantizations, files_prefix,
-                         coarse_quantizations_file);
+                         build_quantizations, files_prefix,
+                         quantizations_file, main_centroids_count);
   return 0;
 }

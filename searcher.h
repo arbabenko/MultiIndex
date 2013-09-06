@@ -163,7 +163,10 @@ class Searcher {
   * Number of neighbours found to this moment
   */
   mutable int found_neghbours_count_;
+
   vector<vector<float> > precomputed_norms_;
+
+  vector<float> main_norms_;
 };
 
 template<class Record, class MetaInfo>
@@ -191,21 +194,31 @@ void Searcher<Record, MetaInfo>::DeserializeData(const string& index_files_prefi
   }
   boost::archive::binary_iarchive arc_cell_edges(cell_edges);
   arc_cell_edges >> multiindex_.cell_edges;
+  cout << "Cell edges deserialized...\n";
+
   ifstream multi_array(string(index_files_prefix + "_multi_array.bin").c_str(), ios::binary);
   if(!multi_array.good()) {
     throw std::logic_error("Bad input multiarray stream");
   }
   boost::archive::binary_iarchive arc_multi_array(multi_array);
   arc_multi_array >> multiindex_.multiindex;
-  //for (int i=0;i<16384;++i) cout << multiindex_.cell_edges.table[i] << endl;
-  cout << "Multiindex deserialized...\n";
+  cout << "Multiarray deserialized...\n";
+
   ifstream norms(string(index_files_prefix + "_prec_norms.bin").c_str(), ios::binary);
   if(!norms.good()) {
     throw std::logic_error("Bad input norms stream");
   }
   boost::archive::binary_iarchive arc_norms(norms);
   arc_norms >> precomputed_norms_;
-  cout << "Multiindex deserialized...\n";
+  cout << "Effective norms deserialized...\n";
+
+  ifstream main_norms(string(index_files_prefix + "_main_norms.bin").c_str(), ios::binary);
+  if(!main_norms.good()) {
+    throw std::logic_error("Bad input main norms stream");
+  }
+  boost::archive::binary_iarchive arc_main_norms(main_norms);
+  arc_main_norms >> main_norms_;  
+  cout << "Main norms deserialized...\n";
 
   ReadCentroids<float>(main_vocabs_file, SPACE_DIMENSION, &main_vocabs_);
   ReadCentroids<float>(res_vocabs_file, SPACE_DIMENSION, &res_vocabs_);

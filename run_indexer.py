@@ -35,6 +35,9 @@ main_vocabs_size = 4096
 # residual vocabs count
 res_vocabs_count = 4096
 
+# number of main centroids to handle
+main_centroids_count = 16
+
 # should we use residuals for reranking
 use_residuals = 1
 
@@ -72,8 +75,9 @@ launch_line = launch_line + '--res_vocabs_file=' + bigann_root + '/fine_vocabs/'
 launch_line = launch_line + '--input_point_type=' + input_type + ' '
 launch_line = launch_line + '--points_count=' + str(points_count) + ' '
 launch_line = launch_line + '--space_dim=' + str(space_dim) + ' '
+launch_line = launch_line + '--main_centroids_count=' + str(main_centroids_count) + ' '
 launch_line = launch_line + '--files_prefix=' + bigann_root + '/indices/' + filename_prefix + ' ' 
-launch_line = launch_line + '--coarse_quantization_file=' + bigann_root + '/cq/' + coarse_quantization_filename + ' '
+launch_line = launch_line + '--quantization_file=' + bigann_root + '/cq/' + coarse_quantization_filename + ' '
 launch_line = launch_line + '--metainfo_file=fake.txt' + ' '
 if use_residuals:
     launch_line = launch_line + '--use_residuals' + ' '

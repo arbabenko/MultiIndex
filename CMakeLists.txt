@@ -11,9 +11,8 @@ OPTION(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 project (NearestSearch CXX C)
 cmake_minimum_required(VERSION 2.6)
 
-find_package(Boost COMPONENTS program_options serialization system filesystem thread REQUIRED)
-
 IF (UNIX)
+    find_package(Boost COMPONENTS program_options serialization system filesystem thread REQUIRED)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fopenmp -DMKL_ILP64 -m64")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -fopenmp -DMKL_ILP64 -m64")
 ENDIF (UNIX)
@@ -33,8 +32,8 @@ SET(BOOST_DIR /usr/include/boost)
 SET(BOOST_LIB /usr/local/lib)
 ENDIF (UNIX)
 IF(WIN32)
-SET(BOOST_DIR C:/Users/arbabenko/Soft/boost_1_47_0)
-SET(BOOST_LIB C:/Users/arbabenko/Soft/boost_1_47_0/lib/x64/lib)
+SET(BOOST_DIR C:/Users/arbabenko/Soft/boost/boost_1_53_0)
+SET(BOOST_LIB C:/Users/arbabenko/Soft/boost/boost_1_53_0/build/lib)
 ENDIF(WIN32)
 
 # ADD BLAS
@@ -44,9 +43,9 @@ SET(BLAS_LIB /opt/intel/composer_xe_2013.2.146/mkl/lib/intel64
              /opt/intel/composer_xe_2013.2.146/compiler/lib/intel64)
 ENDIF (UNIX)
 IF(WIN32)
-SET(BLAS_DIR "C:/Program Files (x86)/Intel/Composer XE 2011 SP1/mkl/include")
-SET(BLAS_LIB "C:/Program Files (x86)/Intel/Composer XE 2011 SP1/mkl/lib/intel64"
-             "C:/Program Files (x86)/Intel/Composer XE 2011 SP1/compiler/lib/intel64")
+SET(BLAS_DIR "C:/Program Files (x86)/Intel/Composer XE 2013/mkl/include")
+SET(BLAS_LIB "C:/Program Files (x86)/Intel/Composer XE 2013/mkl/lib/intel64"
+             "C:/Program Files (x86)/Intel/Composer XE 2013/compiler/lib/intel64")
 ENDIF(WIN32)
 
 ##########################################################################################
@@ -92,20 +91,4 @@ IF(WIN32)
 TARGET_LINK_LIBRARIES (searcher_tester mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib)
 ENDIF(WIN32)
 
-##########################################################################################
-set (GistGroundtruth ${Source_Path}/gist_groundtruth.cpp)
-INCLUDE_DIRECTORIES(${BOOST_DIR})
-INCLUDE_DIRECTORIES(${BLAS_DIR})
-LINK_DIRECTORIES(${BOOST_LIB})
-LINK_DIRECTORIES(${BLAS_LIB})
-INCLUDE_DIRECTORIES(${Source_Path})
-ADD_EXECUTABLE (gist_groundtruth ${GistGroundtruth})
-TARGET_LINK_LIBRARIES (gist_groundtruth nearest_search_lib)
-target_link_libraries( gist_groundtruth ${Boost_LIBRARIES} )
-IF (UNIX)
-TARGET_LINK_LIBRARIES (gist_groundtruth  libmkl_intel_ilp64.a libmkl_gnu_thread.a libmkl_core.a dl pthread m)
-ENDIF (UNIX)
-IF(WIN32)
-TARGET_LINK_LIBRARIES (gist_groundtruth  mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib)
-ENDIF(WIN32)
 
