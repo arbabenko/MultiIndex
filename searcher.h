@@ -284,28 +284,31 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
   boost::heap::priority_queue<pair<float, pair<ClusterId, ClusterId> > >::const_iterator current_cell = queue.begin();
   clock_t before_traversal = clock();
   while(found_neghbours_count_ < k && current_cell != queue.end()) {
-      vector<ClusterId> quantization;
-      quantization.push_back(current_cell->second.first);
-      quantization.push_back(current_cell->second.second);
-      int cell_start, cell_finish;
-      GetCellEdgesInMultiIndexArray(quantization, &cell_start, &cell_finish);
-      if(cell_start >= cell_finish) {
-         ++current_cell;
-         continue;
-      }
-      Point residual = point;
-      cblas_saxpy(point.size(), -1, &(main_vocabs_[quantization[0]][0]), 1, &(residual[0]), 1);
-      cblas_saxpy(point.size(), -1, &(res_vocabs_[quantization[1]][0]), 1, &(residual[0]), 1);
-      typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
-      cell_finish = std::min((int)cell_finish, cell_start + (int)neighbours->size() - found_neghbours_count_);
-      for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
+    vector<ClusterId> quantization;
+    quantization.push_back(current_cell->second.first);
+    quantization.push_back(current_cell->second.second);
+    int cell_start, cell_finish;
+    GetCellEdgesInMultiIndexArray(quantization, &cell_start, &cell_finish);
+    if(cell_start >= cell_finish) {
+        ++current_cell;
+        continue;
+    }
+    Point residual = point;
+    cblas_saxpy(point.size(), -1, &(main_vocabs_[quantization[0]][0]), 1, &(residual[0]), 1);
+    cblas_saxpy(point.size(), -1, &(res_vocabs_[quantization[1]][0]), 1, &(residual[0]), 1);
+    typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
+    cell_finish = std::min((int)cell_finish, cell_start + (int)neighbours->size() - found_neghbours_count_);
+    for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
         
-        Record record = multiindex_.multiindex[array_index];
-        RecordToMetainfoAndDistance<Record, MetaInfo>(residual, record, rerank_vocabs_,
-                                                      &(neighbours->at(found_neghbours_count_)));
-        ++found_neghbours_count_;
-      }
-      ++current_cell;
+      Record record = multiindex_.multiindex[array_index];
+      RecordToMetainfoAndDistance<Record, MetaInfo>(residual, record, rerank_vocabs_,
+                                                    &(neighbours->at(found_neghbours_count_)));
+      ++found_neghbours_count_;
+    }
+    ++current_cell;
+  }
+  if(do_rerank_) {
+    std::sort(neighbours->begin(), neighbours->end());
   }
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
