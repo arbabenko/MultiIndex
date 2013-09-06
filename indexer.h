@@ -313,7 +313,7 @@ void Indexer<Record>::SerializeHierIndexFiles() {
   cout << "Finish hierindex serializing....\n";
 }
 
-std::ofstream dist("distor_hier.txt");
+//std::ofstream dist("distor_hier.txt");
 
 template<class Record>
 void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
@@ -332,7 +332,7 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
   point_stream.seekg(start_pid * (GetInputCoordSizeof() * SPACE_DIMENSION + sizeof(Dimensions)), ios::beg);
   vector<ClusterId> quantization(2);
   for(int point_number = 0; point_number < subset_size; ++point_number) {
-    if(point_number % 1000 == 0) {
+    if(point_number % 10000 == 0) {
       cout << "Getting quantization, point # " << start_pid + point_number << endl;
     }
     Point current_point;
@@ -378,14 +378,14 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
     transposed_quantizations->at(1)[start_pid + point_number] = optimal_res;
     quantization[1] = optimal_res;
     // just for testing
-    cblas_saxpy(current_point.size(), -1, &(main_vocabs[optimal_main][0]), 1, &(current_point[0]), 1);
-    float distors1 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
-    cblas_saxpy(current_point.size(), -1, &(res_vocabs[optimal_res][0]), 1, &(current_point[0]), 1);
-    float distors2 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
+    //cblas_saxpy(current_point.size(), -1, &(main_vocabs[optimal_main][0]), 1, &(current_point[0]), 1);
+    //float distors1 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
+    //cblas_saxpy(current_point.size(), -1, &(res_vocabs[optimal_res][0]), 1, &(current_point[0]), 1);
+    //float distors2 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
     //
     int global_index = point_in_cells_count_.GetCellGlobalIndex(quantization);
     cell_counts_mutex_.lock();
-    dist << distors1 << " " << distors2 << std::endl; // debugging
+    //dist << distors1 << " " << distors2 << std::endl; // debugging
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }
