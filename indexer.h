@@ -256,10 +256,6 @@ void Indexer<Record>::PrecomputeEffectiveCentroidsNorms(const Centroids& main_vo
   for(int i = 0; i < main_vocabs.size(); ++i) {
     main_norms_[i] = cblas_sdot(main_vocabs[i].size(), &(main_vocabs[i][0]), 1, &(main_vocabs[i][0]), 1);
   }
-  res_norms_.resize(res_vocabs.size());
-  for(int i = 0; i < res_vocabs.size(); ++i) {
-    res_norms_[i] = cblas_sdot(res_vocabs[i].size(), &(res_vocabs[i][0]), 1, &(res_vocabs[i][0]), 1);
-  }
   precomputed_norms_.resize(main_vocabs.size());
   for(int i = 0; i < main_vocabs.size(); ++i) {
     precomputed_norms_[i].resize(res_vocabs.size());
