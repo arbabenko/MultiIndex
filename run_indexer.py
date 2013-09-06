@@ -82,7 +82,7 @@ launch_line = launch_line + '--metainfo_file=fake.txt' + ' '
 if use_residuals:
     launch_line = launch_line + '--use_residuals' + ' '
 if build_coarse:
-    launch_line = launch_line + '--build_coarse' + ' '
+    launch_line = launch_line + '--build_quantizations' + ' '
 
 f = open(build_folder + '/' + launch_time + '/launch.sh', 'w')
 f.write(launch_line)
