@@ -23,6 +23,10 @@ string main_vocabs_file;
  */
 string res_vocabs_file;
 /**
+ * File with vocabularies for reranking
+ */
+string rerank_vocabs_file;
+/**
  * Reranking approach, should be USE_RESIDUALS or USE_INIT_POINTS
  */
 RerankMode mode;
@@ -75,6 +79,7 @@ int SetOptions(int argc, char** argv) {
     ("groundtruth_file,g", value<string>())
     ("main_vocabs_file,c", value<string>())
     ("res_vocabs_file,f", value<string>())
+    ("rerank_vocabs_file,e", value<string>())
     ("query_point_type,t", value<string>())
     ("do_rerank,l", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
@@ -106,6 +111,7 @@ int SetOptions(int argc, char** argv) {
 
   main_vocabs_file =           name_to_value["main_vocabs_file"].as<string>();
   res_vocabs_file =            name_to_value["res_vocabs_file"].as<string>();
+  rerank_vocabs_file =         name_to_value["rerank_vocabs_file"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   index_files_prefix =         name_to_value["index_files_prefix"].as<string>();
   queries_file =               name_to_value["queries_file"].as<string>();
@@ -130,7 +136,7 @@ void TestSearcher(TSearcher& searcher,
                   const Points& queries,
                   const vector<vector<PointId> >& groundtruth) {
   searcher.Init(index_files_prefix, main_vocabs_file,
-                res_vocabs_file, mode,
+                res_vocabs_file, rerank_vocabs_file, mode,
                 main_centroids_count, do_rerank);
   cout << "Searcher inited ...\n";
   vector<double> recalls(5, 0.0);

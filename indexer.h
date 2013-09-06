@@ -69,6 +69,7 @@ class Indexer {
                       const int points_count,
                       const Centroids& main_vocabs,
                       const Centroids& res_vocabs,
+                      const vector<Centroids>& rerank_vocabs,
                       const RerankMode& mode,
                       const bool build_quantization,
                       const string& files_prefix,
@@ -218,13 +219,13 @@ class Indexer {
   float* main_vocabs_matrix_;
 
   float* res_vocabs_matrix_;
+  
+  vector<Centroids> rerank_vocabs_;
 };
 
 template<class Record>
 inline void GetRecord(const Point& point, const PointId pid,
-                      const vector<ClusterId> quantization,
-                      const Centroids& main_vocabs,
-                      const Centroids& res_vocabs,
+                      const vector<Centroids>& rerank_vocabs,
                       Record* result) {
 }
 
@@ -462,13 +463,13 @@ void Indexer<Record>::FillHierIndexForSubset(const string& points_filename,
     vector<ClusterId> quantization(2);
     GetPointQuantization(start_pid + point_number, quantization_filename_, &quantization);
 
-    cell_counts_mutex_.lock();
     int current_written_count = points_written_in_index->GetValue(quantization);
     int pid_multiindex = multiindex_.cell_edges.GetValue(quantization) + current_written_count;
-    multiindex_.multiindex[pid_multiindex].pid = start_pid + point_number;
-    // TODO - add rerank info
-    //GetRecord<Record>(current_point, start_pid + point_number,
-    //                  coarse_quantization, coarse_vocabs, &(multiindex_.multiindex[pid_multiindex]));
+    cblas_saxpy(current_point.size(), -1, &(main_vocabs[quantization[0]][0]), 1, &(current_point[0]), 1);
+    cblas_saxpy(current_point.size(), -1, &(res_vocabs[quantization[1]][0]), 1, &(current_point[0]), 1);
+    GetRecord<Record>(current_point, start_pid + point_number,
+                      rerank_vocabs_, &(multiindex_.multiindex[pid_multiindex]));
+    cell_counts_mutex_.lock();
     points_written_in_index->SetValue(current_written_count + 1, quantization);
     cell_counts_mutex_.unlock();
   }
@@ -530,6 +531,7 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
                                      const int points_count,
                                      const Centroids& main_vocabs,
                                      const Centroids& res_vocabs,
+                                     const vector<Centroids>& rerank_vocabs,
                                      const RerankMode& mode,
                                      const bool build_quantization,
                                      const string& files_prefix,
@@ -540,6 +542,7 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
   files_prefix_ = files_prefix;
   main_centroids_count_ = main_centroids_count;
   quantization_filename_ = quantization_filename;
+  rerank_vocabs_ = rerank_vocabs;
   PrecomputeEffectiveCentroidsNorms(main_vocabs, res_vocabs);
   cout << "Norms are precomputed" << endl;
   if(build_quantization) {
@@ -575,9 +578,7 @@ void Indexer<Record>::InitBlasStructures(const Centroids& main_vocabs,
 
 template<>
 inline void GetRecord<PointId> (const Point& point, const PointId pid,
-                                const vector<ClusterId> quantization,
-                                const Centroids& coarse_vocabs,
-                                const Centroids& res_vocabs,
+                                const vector<Centroids>& rerank_vocabs,
                                 PointId* result) {
   *result = pid;
 }
@@ -598,36 +599,20 @@ inline void FillAdcInfo(const Point& point, const PointId pid,
 
 template<>
 inline void GetRecord<RerankADC8>(const Point& point, const PointId pid,
-                                  const vector<ClusterId> quantization,
-                                  const Centroids& coarse_vocabs,
-                                  const Centroids& res_vocabs,
+                                  const vector<Centroids>& rerank_vocabs,
                                   RerankADC8* result) {
   result->pid = pid;
   char* rerank_info_ptr = (char*)result + sizeof(pid);
-  if(gConfig.rerank_mode == USE_RESIDUALS) {
-    Point residual;
-    //GetResidual(point, quantization, coarse_vocabs, &residual);
-    FillAdcInfo(residual, pid, gConfig.fine_vocabs, rerank_info_ptr);
-  } else if (gConfig.rerank_mode == USE_INIT_POINTS) {
-    FillAdcInfo(point, pid, gConfig.fine_vocabs, rerank_info_ptr);
-  }
+  FillAdcInfo(point, pid, rerank_vocabs, rerank_info_ptr);
 }
 
 template<>
-inline void GetRecord<RerankADC16> (const Point& point, const PointId pid,
-                                    const vector<ClusterId> quantization,
-                                    const Centroids& coarse_vocabs,
-                                    const Centroids& res_vocabs,
-                                    RerankADC16* result) {
+inline void GetRecord<RerankADC16>(const Point& point, const PointId pid,
+                                  const vector<Centroids>& rerank_vocabs,
+                                  RerankADC16* result) {
   result->pid = pid;
   char* rerank_info_ptr = (char*)result + sizeof(pid);
-  if(gConfig.rerank_mode == USE_RESIDUALS) {
-    Point residual;
-    //GetResidual(point, quantization, coarse_vocabs, &residual);
-    FillAdcInfo(residual, pid, gConfig.fine_vocabs, rerank_info_ptr);
-  } else if (gConfig.rerank_mode == USE_INIT_POINTS) {
-    FillAdcInfo(point, pid, gConfig.fine_vocabs, rerank_info_ptr);
-  }
+  FillAdcInfo(point, pid, rerank_vocabs, rerank_info_ptr);
 }
 
 #endif

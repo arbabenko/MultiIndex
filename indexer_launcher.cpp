@@ -28,6 +28,10 @@ string main_vocabs_file;
  */
 string res_vocabs_file;
 /**
+ * File with vocabularies for reranking
+ */
+string rerank_vocabs_file;
+/**
  * File with points to index
  */
 string points_file;
@@ -68,6 +72,7 @@ int SetOptions(int argc, char** argv) {
     ("metainfo_file,z", value<string>())
     ("main_vocabs_file,c", value<string>())
     ("res_vocabs_file,f", value<string>())
+    ("rerank_vocabs_file,e", value<string>())
     ("input_point_type,i", value<string>())
     ("build_quantizations,b", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
@@ -103,6 +108,7 @@ int SetOptions(int argc, char** argv) {
   metainfo_file =              name_to_value["metainfo_file"].as<string>();
   main_vocabs_file =           name_to_value["main_vocabs_file"].as<string>();
   res_vocabs_file =            name_to_value["res_vocabs_file"].as<string>();
+  rerank_vocabs_file =         name_to_value["rerank_vocabs_file"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   files_prefix =               name_to_value["files_prefix"].as<string>();
   points_count =               name_to_value["points_count"].as<int>();
@@ -127,12 +133,14 @@ int main(int argc, char** argv) {
   cout << "Options are set ...\n";
   Centroids main_vocabs;
   Centroids res_vocabs;
+  vector<Centroids> rerank_vocabs;
   ReadCentroids<float>(main_vocabs_file, SPACE_DIMENSION, &main_vocabs);
   ReadCentroids<float>(res_vocabs_file, SPACE_DIMENSION, &res_vocabs);
+  ReadFineVocabs<float>(rerank_vocabs_file, &rerank_vocabs);
   cout << "Vocs are read ...\n";
   Indexer<RerankADC8> indexer;
   indexer.BuildHierIndex(points_file, metainfo_file, points_count,
-                         main_vocabs, res_vocabs, mode,
+                         main_vocabs, res_vocabs, rerank_vocabs ,mode,
                          build_quantizations, files_prefix,
                          quantizations_file, main_centroids_count);
   return 0;
