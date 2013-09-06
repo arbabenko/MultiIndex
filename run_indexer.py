@@ -9,7 +9,7 @@ import sys
 build_folder = './build_hier'
 
 # number of threads to use (max = 32)
-threads_count = 32
+threads_count = 1
 
 # Folder with BigAnn base
 bigann_root = '/sata/ResearchData/BigAnn'

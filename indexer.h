@@ -308,7 +308,7 @@ void Indexer<Record>::SerializeHierIndexFiles() {
   cout << "Finish hierindex serializing....\n";
 }
 
-//std::ofstream dist("distor_hier.txt");
+std::ofstream dist("distor_hier.txt");
 
 template<class Record>
 void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
@@ -342,6 +342,10 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
                                            1, &(main_vocabs[main_cid][0]), 1);
       distance_to_clusterId[main_cid] = std::make_pair(main_norms_[main_cid] / 2 - main_products[main_cid], main_cid);
     }
+    for (int res_cid = 0; res_cid < res_vocabs.size(); ++res_cid) {
+      res_products[res_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
+                                           1, &(res_vocabs[res_cid][0]), 1);
+    }
     std::sort(distance_to_clusterId.begin(), distance_to_clusterId.end());
 
     ClusterId optimal_main = 0;
@@ -354,10 +358,12 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
         float distance = precomputed_norms_[current_optimal_main_cid][res_cid] -
                          2 * main_products[current_optimal_main_cid] -
                          2 * res_products[res_cid];
-        //Point temp = current_point;
+        //float point_norm = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
+        //Point temp = current_point;;
         //cblas_saxpy(temp.size(), -1, &(main_vocabs[current_optimal_main_cid][0]), 1, &(temp[0]), 1);
         //cblas_saxpy(temp.size(), -1, &(res_vocabs[res_cid][0]), 1, &(temp[0]), 1);
         //float distance = cblas_sdot(temp.size(), &(temp[0]), 1, &(temp[0]), 1);
+        //cout << distance2 << " " << point_norm + distance << endl;
         if(distance < optimal_distance) {
           optimal_main = current_optimal_main_cid;
           optimal_res = res_cid;
@@ -377,7 +383,7 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
     //
     int global_index = point_in_cells_count_.GetCellGlobalIndex(quantization);
     cell_counts_mutex_.lock();
-    //dist << distors1 << " " << distors2 << std::endl; // debugging
+    dist << distors1 << " " << distors2 << std::endl; // debugging
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }
@@ -638,7 +644,5 @@ inline void GetRecord<RerankADC16> (const Point& point, const PointId pid,
 }
 
 #endif
-
-
 
 
