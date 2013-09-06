@@ -36,7 +36,7 @@ main_vocabs_size = 4096
 res_vocabs_count = 4096
 
 # number of main centroids to handle
-main_centroids_count = 16
+main_centroids_count = 128
 
 # should we use residuals for reranking
 use_residuals = 1

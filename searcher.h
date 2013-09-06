@@ -9,6 +9,8 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
+#include <boost/heap/priority_queue.hpp>
+
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/vector.hpp>
@@ -283,38 +285,41 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
   found_neghbours_count_ = 0;
   neighbours->resize(k);
+  perf_tester_.handled_queries_count += 1;
   perf_tester_.ResetQuerywiseStatistic();
   clock_t start = clock();
   perf_tester_.search_start = start;
   clock_t before = clock();
-  vector<float> main_products(main_vocabs.size(), 0);
-  vector<float> res_products(res_vocabs.size(), 0);
+  vector<float> main_products(main_vocabs_.size(), 0);
+  vector<float> res_products(res_vocabs_.size(), 0);
   vector<pair<float, int> > distance_to_clusterId(main_products.size());
-  cblas_sgemv(CblasRowMajor, CblasNoTrans, main_vocabs.size(), main_vocabs[0].size(), 1.0,
-              main_vocabs_matrix_, main_vocabs[0].size(), &(point[0]), 1, 1, &(main_products[0]), 1);
-  for (int main_cid = 0; main_cid < main_vocabs.size(); ++main_cid) {
+  cblas_sgemv(CblasRowMajor, CblasNoTrans, main_vocabs_.size(), main_vocabs_[0].size(), 1.0,
+              main_vocabs_matrix_, main_vocabs_[0].size(), &(point[0]), 1, 1, &(main_products[0]), 1);
+  for (int main_cid = 0; main_cid < main_vocabs_.size(); ++main_cid) {
     distance_to_clusterId[main_cid] = std::make_pair(main_norms_[main_cid] / 2 - main_products[main_cid], main_cid);
   }
-  cblas_sgemv(CblasRowMajor, CblasNoTrans, res_vocabs.size(), res_vocabs[0].size(), 1.0,
-              res_vocabs_matrix_, res_vocabs[0].size(), &(point[0]), 1, 1, &(res_products[0]), 1);
+  cblas_sgemv(CblasRowMajor, CblasNoTrans, res_vocabs_.size(), res_vocabs_[0].size(), 1.0,
+              res_vocabs_matrix_, res_vocabs_[0].size(), &(point[0]), 1, 1, &(res_products[0]), 1);
   std::sort(distance_to_clusterId.begin(), distance_to_clusterId.end());
   clock_t after = clock();
   perf_tester_.nearest_subcentroids_time += after - before;
   clock_t before_merger = clock();
-  std::multimap<float, pair<ClusterId, ClusterId> > queue;
+  //std::multimap<float, pair<ClusterId, ClusterId> > queue;
+  boost::heap::priority_queue<pair<float, pair<ClusterId, ClusterId> > > queue;
   for(int main_cid = 0; main_cid < main_centroids_to_consider_; ++main_cid) {
     for(int res_cid = 0; res_cid < res_vocabs_.size(); ++res_cid) {
       int main_cluster = distance_to_clusterId[main_cid].second;
       float score = precomputed_norms_[main_cluster][res_cid] -
                     2 * main_products[main_cluster] -
                     2 * res_products[res_cid];
-      queue.insert(std::make_pair(score, std::make_pair(main_cluster,res_cid)));
+      //queue.insert(std::make_pair(score, std::make_pair(main_cluster,res_cid)));
+      queue.push(std::make_pair(-1 * score, std::make_pair(main_cluster,res_cid)));
     }
   }
   clock_t after_merger = clock();
   perf_tester_.merger_init_time += after_merger - before_merger;
-  cout << "Traverse started" << endl;
-  std::multimap<float, pair<ClusterId, ClusterId> >::iterator current_cell = queue.begin();
+  //std::multimap<float, pair<ClusterId, ClusterId> >::iterator current_cell = queue.begin();
+  boost::heap::priority_queue<pair<float, pair<ClusterId, ClusterId> > >::const_iterator current_cell = queue.begin();
   clock_t before_traversal = clock();
   while(found_neghbours_count_ < k && current_cell != queue.end()) {
       vector<ClusterId> quantization;
