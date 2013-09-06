@@ -101,7 +101,7 @@ class Searcher {
   * This fuctions converts complex objects to arrays and
   * pointers for usage in BLAS
   */
-  //void InitBlasStructures();
+  void InitBlasStructures();
  /**
   * Lists of coarse centroids
   */
@@ -167,6 +167,10 @@ class Searcher {
   vector<vector<float> > precomputed_norms_;
 
   vector<float> main_norms_;
+
+  float* main_vocabs_matrix_;
+
+  float* res_vocabs_matrix_;
 };
 
 template<class Record, class MetaInfo>
@@ -245,25 +249,22 @@ void Searcher<Record, MetaInfo>::Init(const string& index_files_prefix,
   //InitBlasStructures();
 }
 
-//template<class Record, class MetaInfo>
-//void MultiSearcher<Record, MetaInfo>::InitBlasStructures(){
-//  coarse_vocabs_matrices_.resize(coarse_vocabs_.size());
-//  coarse_centroids_norms_.resize(coarse_vocabs_.size(), vector<float>(coarse_vocabs_[0].size()));
-//  for(int coarse_id = 0; coarse_id < coarse_vocabs_matrices_.size(); ++coarse_id) {
-//    coarse_vocabs_matrices_[coarse_id] = new float[coarse_vocabs_[0].size() * coarse_vocabs_[0][0].size()];
-//    for(int i = 0; i < coarse_vocabs_[0].size(); ++i) {
-//      Coord norm = 0;
-//      for(int j = 0; j < coarse_vocabs_[0][0].size(); ++j) {
-//        coarse_vocabs_matrices_[coarse_id][coarse_vocabs_[0][0].size() * i + j] = coarse_vocabs_[coarse_id][i][j];
-//        norm += coarse_vocabs_[coarse_id][i][j] * coarse_vocabs_[coarse_id][i][j];
-//      }
-//      coarse_centroids_norms_[coarse_id][i] = norm;
-//    }
-//  }
-//  products_ = new Coord[coarse_vocabs_[0].size()];
-//  query_norms_.resize(coarse_vocabs_[0].size());
-//  residual_ = new Coord[coarse_vocabs_[0][0].size() * coarse_vocabs_.size()];
-//}
+template<class Record, class MetaInfo>
+void Searcher<Record, MetaInfo>::InitBlasStructures(){
+
+  main_vocabs_matrix_ = new float[main_vocabs_.size() * main_vocabs_[0].size()];
+  for(int cid = 0; cid < main_vocabs_.size(); ++cid) {
+    for(int coord = 0; coord < main_vocabs_[0].size(); ++coord) {
+        main_vocabs_matrix_[cid * main_vocabs_[0].size() + coord] = main_vocabs_[cid][coord];
+    }
+  }
+  res_vocabs_matrix_ = new float[res_vocabs_.size() * res_vocabs_[0].size()];
+  for(int cid = 0; cid < res_vocabs_.size(); ++cid) {
+    for(int coord = 0; coord < res_vocabs_[0].size(); ++coord) {
+        res_vocabs_matrix_[cid * res_vocabs_[0].size() + coord] = res_vocabs_[cid][coord];
+    }
+  }
+}
 
 //template<class Record, class MetaInfo>
 //PerfTester& MultiSearcher<Record, MetaInfo>::GetPerfTester() {

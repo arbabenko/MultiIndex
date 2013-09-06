@@ -186,6 +186,8 @@ class Indexer {
   */
   void ReadPoint(ifstream& input, Point* point);
 
+  void InitBlasStructures(const Centroids& main_vocabs, const Centroids& res_vocabs);
+
  /**
   *  All index filenames will start from this prefix
   */
@@ -213,6 +215,9 @@ class Indexer {
 
   int main_centroids_count_;
 
+  float* main_vocabs_matrix_;
+
+  float* res_vocabs_matrix_;
 };
 
 template<class Record>
@@ -333,19 +338,22 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
     Point current_point;
     ReadPoint(point_stream, &current_point);
     ////// GETTING QUANTIZATIONS
-    vector<float> main_products(main_vocabs.size());
-    vector<float> res_products(res_vocabs.size());
+    vector<float> main_products(main_vocabs.size(), 0);
+    vector<float> res_products(res_vocabs.size(), 0);
     vector<pair<float, int> > distance_to_clusterId(main_products.size());
-
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, main_vocabs.size(), main_vocabs[0].size(), 1.0,
+                main_vocabs_matrix_, main_vocabs[0].size(), &(current_point[0]), 1, 1, &(main_products[0]), 1);
     for (int main_cid = 0; main_cid < main_vocabs.size(); ++main_cid) {
-      main_products[main_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
-                                           1, &(main_vocabs[main_cid][0]), 1);
+      //main_products[main_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
+      //                                     1, &(main_vocabs[main_cid][0]), 1);
       distance_to_clusterId[main_cid] = std::make_pair(main_norms_[main_cid] / 2 - main_products[main_cid], main_cid);
     }
-    for (int res_cid = 0; res_cid < res_vocabs.size(); ++res_cid) {
-      res_products[res_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
-                                           1, &(res_vocabs[res_cid][0]), 1);
-    }
+    //for (int res_cid = 0; res_cid < res_vocabs.size(); ++res_cid) {
+    //  res_products[res_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
+    //                                       1, &(res_vocabs[res_cid][0]), 1);
+    //}
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, res_vocabs.size(), res_vocabs[0].size(), 1.0,
+                res_vocabs_matrix_, res_vocabs[0].size(), &(current_point[0]), 1, 1, &(res_products[0]), 1);
     std::sort(distance_to_clusterId.begin(), distance_to_clusterId.end());
 
     ClusterId optimal_main = 0;
@@ -358,12 +366,6 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
         float distance = precomputed_norms_[current_optimal_main_cid][res_cid] -
                          2 * main_products[current_optimal_main_cid] -
                          2 * res_products[res_cid];
-        //float point_norm = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
-        //Point temp = current_point;;
-        //cblas_saxpy(temp.size(), -1, &(main_vocabs[current_optimal_main_cid][0]), 1, &(temp[0]), 1);
-        //cblas_saxpy(temp.size(), -1, &(res_vocabs[res_cid][0]), 1, &(temp[0]), 1);
-        //float distance = cblas_sdot(temp.size(), &(temp[0]), 1, &(temp[0]), 1);
-        //cout << distance2 << " " << point_norm + distance << endl;
         if(distance < optimal_distance) {
           optimal_main = current_optimal_main_cid;
           optimal_res = res_cid;
@@ -549,7 +551,7 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
                                      const string& quantization_filename,
                                      int main_centroids_count) {
   //InitParameters<Record>(fine_vocabs, mode, metainfo_filename);
-  //InitBlasStructures(coarse_vocabs);
+  InitBlasStructures(main_vocabs, res_vocabs);
   files_prefix_ = files_prefix;
   main_centroids_count_ = main_centroids_count;
   quantization_filename_ = quantization_filename;
@@ -569,22 +571,22 @@ void Indexer<Record>::BuildHierIndex(const string& points_filename,
   cout << "Hierindex serialized" << endl;
 }
 
-//template<class Record>
-//void MultiIndexer<Record>::InitBlasStructures(const vector<Centroids>& coarse_vocabs) {
-//  coarse_vocabs_matrices_.resize(coarse_vocabs.size());
-//  coarse_centroids_norms_.resize(coarse_vocabs.size(), vector<float>(coarse_vocabs[0].size()));
-//  for(int coarse_id = 0; coarse_id < coarse_vocabs_matrices_.size(); ++coarse_id) {
-//    coarse_vocabs_matrices_[coarse_id] = new float[coarse_vocabs[0].size() * coarse_vocabs[0][0].size()];
-//    for(int i = 0; i < coarse_vocabs[0].size(); ++i) {
-//      Coord norm = 0;
-//      for(int j = 0; j < coarse_vocabs[0][0].size(); ++j) {
-//        coarse_vocabs_matrices_[coarse_id][coarse_vocabs[0][0].size() * i + j] = coarse_vocabs[coarse_id][i][j];
-//        norm += coarse_vocabs[coarse_id][i][j] * coarse_vocabs[coarse_id][i][j];
-//      }
-//      coarse_centroids_norms_[coarse_id][i] = norm;
-//    }
-//  }
-//}
+template<class Record>
+void Indexer<Record>::InitBlasStructures(const Centroids& main_vocabs,
+                                         const Centroids& res_vocabs) {
+  main_vocabs_matrix_ = new float[main_vocabs.size() * main_vocabs[0].size()];
+  for(int cid = 0; cid < main_vocabs.size(); ++cid) {
+    for(int coord = 0; coord < main_vocabs[0].size(); ++coord) {
+        main_vocabs_matrix_[cid * main_vocabs[0].size() + coord] = main_vocabs[cid][coord];
+    }
+  }
+  res_vocabs_matrix_ = new float[res_vocabs.size() * res_vocabs[0].size()];
+  for(int cid = 0; cid < res_vocabs.size(); ++cid) {
+    for(int coord = 0; coord < res_vocabs[0].size(); ++coord) {
+        res_vocabs_matrix_[cid * res_vocabs[0].size() + coord] = res_vocabs[cid][coord];
+    }
+  }
+}
 
 template<>
 inline void GetRecord<PointId> (const Point& point, const PointId pid,
