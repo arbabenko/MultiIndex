@@ -26,6 +26,9 @@ coarse_vocabs_size = 4096
 # res vocabs count
 fine_vocabs_count = 4096
 
+# rerank vocabs count
+rerank_vocabs_count = 8
+
 # should we use residuals?
 use_residuals = 1
 
@@ -62,6 +65,7 @@ multiplicity_extension = 'hier'
 
 coarse_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '.dat'
 fine_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '.dat'
+rerank_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + '_' + str(rerank_vocabs_count) + '.dat'
 filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocabs_size) + '_' + str(fine_vocabs_count) + user_added_postfix
 
 launch_time = datetime.datetime.now().strftime("%I_%M_%S%p_%B_%d_%Y")
@@ -75,6 +79,7 @@ launch_line = launch_line + '--queries_file=' + bigann_root + '/bases/' + querie
 launch_line = launch_line + '--groundtruth_file=' + bigann_root + '/gnd/' + gnd_file + ' '
 launch_line = launch_line + '--main_vocabs_file=' + bigann_root + '/coarse_vocabs/' + coarse_vocabs_filename + ' '
 launch_line = launch_line + '--res_vocabs_file=' + bigann_root + '/fine_vocabs/' + fine_vocabs_filename + ' '
+launch_line = launch_line + '--rerank_vocabs_file=' + bigann_root + '/fine_vocabs/' + rerank_vocabs_filename + ' '
 launch_line = launch_line + '--query_point_type=' + query_input_type + ' '
 launch_line = launch_line + '--queries_count=' + str(queries_count) + ' '
 launch_line = launch_line + '--neighbours_count=' + str(neighbors_count) + ' '

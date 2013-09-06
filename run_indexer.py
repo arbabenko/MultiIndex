@@ -35,6 +35,9 @@ main_vocabs_size = 4096
 # residual vocabs count
 res_vocabs_count = 4096
 
+# rerank vocabs count
+rerank_vocabs_count = 8
+
 # number of main centroids to handle
 main_centroids_count = 1
 
@@ -59,6 +62,7 @@ multiplicity_extension = 'hier'
 
 main_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '.dat'
 res_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '_' + str(res_vocabs_count) + '.dat'
+rerank_vocabs_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '_' + str(res_vocabs_count) + '_' + str(rerank_vocabs_count) + '.dat'
 filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + '_' + str(res_vocabs_count) + user_added_postfix
 coarse_quantization_filename = prefix + '_' + multiplicity_extension + '_' + str(main_vocabs_size) + user_added_postfix + '_coarse_quantizations.bin'
 
@@ -72,6 +76,7 @@ launch_line = launch_line + '--threads_count=' + str(threads_count) + ' '
 launch_line = launch_line + '--points_file=' + bigann_root + '/bases/' + points_file + ' '
 launch_line = launch_line + '--main_vocabs_file=' + bigann_root + '/coarse_vocabs/' + main_vocabs_filename + ' '
 launch_line = launch_line + '--res_vocabs_file=' + bigann_root + '/fine_vocabs/' + res_vocabs_filename + ' '
+launch_line = launch_line + '--rerank_vocabs_file=' + bigann_root + '/fine_vocabs/' + rerank_vocabs_filename + ' '
 launch_line = launch_line + '--input_point_type=' + input_type + ' '
 launch_line = launch_line + '--points_count=' + str(points_count) + ' '
 launch_line = launch_line + '--space_dim=' + str(space_dim) + ' '
