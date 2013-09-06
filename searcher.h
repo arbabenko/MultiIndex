@@ -61,7 +61,7 @@ class Searcher {
  /**
   * Returns searcher perfomance tester
   */
-  //PerfTester& GetPerfTester();
+  PerfTester& GetPerfTester();
  private:
  /**
   * This functions deserializes all structures for search
@@ -241,12 +241,7 @@ void Searcher<Record, MetaInfo>::Init(const string& index_files_prefix,
   main_centroids_to_consider_ = main_centroids_to_consider;
   DeserializeData(index_files_prefix, main_vocabs_filename, res_vocabs_filename);
   rerank_mode_ = mode;
-  //merger_.GetYieldedItems().table.resize(std::pow((float)subspace_centroids_to_consider,
-	//	                                         (int)coarse_vocabs_.size()));
-  //for(int i = 0; i < coarse_vocabs_.size(); ++i) {
-  //  merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
-  //}
-  //InitBlasStructures();
+  InitBlasStructures();
 }
 
 template<class Record, class MetaInfo>
@@ -266,39 +261,10 @@ void Searcher<Record, MetaInfo>::InitBlasStructures(){
   }
 }
 
-//template<class Record, class MetaInfo>
-//PerfTester& MultiSearcher<Record, MetaInfo>::GetPerfTester() {
-//  return perf_tester_;
-//}
-
-//template<class Record, class MetaInfo>
-//void MultiSearcher<Record, MetaInfo>::GetNearestSubspacesCentroids(const Point& point,
-//                                                                   const int subspace_centroins_count,
-//                                                                   vector<NearestSubspaceCentroids>*
-//                                                                   subspaces_short_lists) const {
-//  std::stringstream aa;
-//  subspaces_short_lists->resize(coarse_vocabs_.size());
-//  Dimensions subspace_dimension = point.size() / coarse_vocabs_.size();
-//  for(int subspace_index = 0; subspace_index < coarse_vocabs_.size(); ++subspace_index) {
-//    Dimensions start_dim = subspace_index * subspace_dimension;
-//    Dimensions final_dim = std::min((Dimensions)point.size(), start_dim + subspace_dimension);
-//    Coord query_norm = cblas_sdot(final_dim - start_dim, &(point[start_dim]), 1, &(point[start_dim]), 1);
-//    std::fill(query_norms_.begin(), query_norms_.end(), query_norm);
-//    cblas_saxpy(coarse_vocabs_[0].size(), 1, &(coarse_centroids_norms_[subspace_index][0]), 1, &(query_norms_[0]), 1);
-//    cblas_sgemv(CblasRowMajor, CblasNoTrans, coarse_vocabs_[0].size(), subspace_dimension, -2.0,
-//                coarse_vocabs_matrices_[subspace_index], subspace_dimension, &(point[start_dim]), 1, 1, &(query_norms_[0]), 1);
-//    subspaces_short_lists->at(subspace_index).resize(query_norms_.size());
-//    for(int i = 0; i < query_norms_.size(); ++i) {
-//      subspaces_short_lists->at(subspace_index)[i] = std::make_pair(query_norms_[i], i);
-//    }
-//    std::nth_element(subspaces_short_lists->at(subspace_index).begin(),
-//                     subspaces_short_lists->at(subspace_index).begin() + subspace_centroins_count,
-//                     subspaces_short_lists->at(subspace_index).end());
-//    subspaces_short_lists->at(subspace_index).resize(subspace_centroins_count);
-//    std::sort(subspaces_short_lists->at(subspace_index).begin(),
-//              subspaces_short_lists->at(subspace_index).end());
-//  }
-//}
+template<class Record, class MetaInfo>
+PerfTester& Searcher<Record, MetaInfo>::GetPerfTester() {
+  return perf_tester_;
+}
 
 template<class Record, class MetaInfo>
 void Searcher<Record, MetaInfo>::GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
@@ -312,78 +278,44 @@ void Searcher<Record, MetaInfo>::GetCellEdgesInMultiIndexArray(const vector<int>
   }
 }
 
-//template<class Record, class MetaInfo>
-//bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& point,
-//                                                                 vector<pair<Distance, MetaInfo> >*
-//                                                                             nearest_subpoints) const {
-//  MergedItemIndices cell_inner_indices;
-//  clock_t before = clock();
-//  if(!merger_.GetNextMergedItemIndices(&cell_inner_indices)) {
-//    return false;
-//  }
-//  clock_t after = clock();
-//  perf_tester_.cell_coordinates_time += after - before;
-//  vector<int> cell_coordinates(cell_inner_indices.size());
-//  for(int list_index = 0; list_index < merger_.lists_ptr->size(); ++list_index) {
-//    cell_coordinates[list_index] = merger_.lists_ptr->at(list_index)[cell_inner_indices[list_index]].second;
-//  }
-//  int cell_start, cell_finish;
-//  before = clock();
-//  GetCellEdgesInMultiIndexArray(cell_coordinates, &cell_start, &cell_finish);
-//  after = clock();
-//  perf_tester_.cell_edges_time += after - before;
-//  if(cell_start >= cell_finish) {
-//    return true;
-//  }
-//  typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
-//  GetResidual(point, cell_coordinates, coarse_vocabs_, residual_);
-//  cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
-//  for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
-//    if(rerank_mode_ == USE_RESIDUALS) {
-//      RecordToMetainfoAndDistance<Record, MetaInfo>(residual_, *it,
-//                                                    &(nearest_subpoints->at(found_neghbours_count_)),
-//                                                    cell_coordinates, fine_vocabs_);
-//    } else if(rerank_mode_ == USE_INIT_POINTS) {
-//      RecordToMetainfoAndDistance<Record, MetaInfo>(&(point[0]), *it,
-//                                                    &(nearest_subpoints->at(found_neghbours_count_)),
-//                                                    cell_coordinates, fine_vocabs_);
-//    }
-//    perf_tester_.NextNeighbour();
-//    ++found_neghbours_count_;
-//    ++it;
-//  }
-//  return true;
-//}
-
-
 template<class Record, class MetaInfo>
 void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
   found_neghbours_count_ = 0;
   neighbours->resize(k);
-  vector<float> main_products(main_vocabs_.size());
-  vector<float> res_products(res_vocabs_.size());
-  vector<pair<float, int> > temp(main_products.size());
-  for (int i = 0; i < main_vocabs_.size(); ++i) {
-    main_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(main_vocabs_[i][0]), 1);
-    float norm = cblas_sdot(point.size(), &(main_vocabs_[i][0]), 1, &(main_vocabs_[i][0]), 1);
-    temp[i] = std::make_pair(norm / 2 - main_products[i], i);
+  perf_tester_.ResetQuerywiseStatistic();
+  clock_t start = clock();
+  perf_tester_.search_start = start;
+  clock_t before = clock();
+  vector<float> main_products(main_vocabs.size(), 0);
+  vector<float> res_products(res_vocabs.size(), 0);
+  vector<pair<float, int> > distance_to_clusterId(main_products.size());
+  cblas_sgemv(CblasRowMajor, CblasNoTrans, main_vocabs.size(), main_vocabs[0].size(), 1.0,
+              main_vocabs_matrix_, main_vocabs[0].size(), &(point[0]), 1, 1, &(main_products[0]), 1);
+  for (int main_cid = 0; main_cid < main_vocabs.size(); ++main_cid) {
+    distance_to_clusterId[main_cid] = std::make_pair(main_norms_[main_cid] / 2 - main_products[main_cid], main_cid);
   }
-  
-  for (int i = 0; i < res_vocabs_.size(); ++i) {
-    res_products[i] = cblas_sdot(point.size(), &(point[0]), 1, &(res_vocabs_[i][0]), 1);
-  }
-  std::sort(temp.begin(), temp.end());
+  cblas_sgemv(CblasRowMajor, CblasNoTrans, res_vocabs.size(), res_vocabs[0].size(), 1.0,
+              res_vocabs_matrix_, res_vocabs[0].size(), &(point[0]), 1, 1, &(res_products[0]), 1);
+  std::sort(distance_to_clusterId.begin(), distance_to_clusterId.end());
+  clock_t after = clock();
+  perf_tester_.nearest_subcentroids_time += after - before;
+  clock_t before_merger = clock();
   std::multimap<float, pair<ClusterId, ClusterId> > queue;
-  for(int i = 0; i < main_centroids_to_consider_; ++i) {
-    for(int j = 0; j < res_vocabs_.size(); ++j) {
-      int main_cluster = temp[i].second;
-      float score = precomputed_norms_[main_cluster][j] - 2 * main_products[main_cluster] - 2 * res_products[j];
-      queue.insert(std::make_pair(score, std::make_pair(main_cluster,j)));
+  for(int main_cid = 0; main_cid < main_centroids_to_consider_; ++main_cid) {
+    for(int res_cid = 0; res_cid < res_vocabs_.size(); ++res_cid) {
+      int main_cluster = distance_to_clusterId[main_cid].second;
+      float score = precomputed_norms_[main_cluster][res_cid] -
+                    2 * main_products[main_cluster] -
+                    2 * res_products[res_cid];
+      queue.insert(std::make_pair(score, std::make_pair(main_cluster,res_cid)));
     }
   }
+  clock_t after_merger = clock();
+  perf_tester_.merger_init_time += after_merger - before_merger;
   cout << "Traverse started" << endl;
   std::multimap<float, pair<ClusterId, ClusterId> >::iterator current_cell = queue.begin();
+  clock_t before_traversal = clock();
   while(found_neghbours_count_ < k && current_cell != queue.end()) {
       vector<ClusterId> quantization;
       quantization.push_back(current_cell->second.first);
@@ -403,42 +335,10 @@ void Searcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k,
       }
       ++current_cell;
   }
-  //assert(k > 0);
-  //perf_tester_.handled_queries_count += 1;
-  //neighbours->resize(k);
-  //perf_tester_.ResetQuerywiseStatistic();
-  //clock_t start = clock();
-  //perf_tester_.search_start = start;
-  //clock_t before = clock();
-  //vector<NearestSubspaceCentroids> subspaces_short_lists;
-  //assert(subspace_centroids_to_consider_ > 0);
-  //GetNearestSubspacesCentroids(point, subspace_centroids_to_consider_, &subspaces_short_lists);
-  //clock_t after = clock();
-  //perf_tester_.nearest_subcentroids_time += after - before;
-  //clock_t before_merger = clock();
-  //merger_.setLists(subspaces_short_lists);
-  //clock_t after_merger = clock();
-  //perf_tester_.merger_init_time += after_merger - before_merger;
-  //clock_t before_traversal = clock();
-  //found_neghbours_count_ = 0;
-  //bool traverse_next_cell = true;
-  //int cells_visited = 0;
-  //while(found_neghbours_count_ < k && traverse_next_cell) {
-  //  perf_tester_.cells_traversed += 1;
-  //  traverse_next_cell = TraverseNextMultiIndexCell(point, neighbours);
-  //  cells_visited += 1;
-  //}
-  //clock_t after_traversal = clock();
-  //perf_tester_.full_traversal_time += after_traversal - before_traversal;
-  //if(do_rerank_) {
-  //  //if(neighbours->size() > 10000) {
-  //  //  std::nth_element(neighbours->begin(), neighbours->begin() + 10000, neighbours->end());
-  //  //  neighbours->resize(10000);
-  //  //}
-  //  //std::sort(neighbours->begin(), neighbours->end());
-  //}
-  //clock_t finish = clock();
-  //perf_tester_.full_search_time += finish - start;
+  clock_t after_traversal = clock();
+  perf_tester_.full_traversal_time += after_traversal - before_traversal;
+  clock_t finish = clock();
+  perf_tester_.full_search_time += finish - start;
 }
 
 template<>

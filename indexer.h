@@ -313,8 +313,6 @@ void Indexer<Record>::SerializeHierIndexFiles() {
   cout << "Finish hierindex serializing....\n";
 }
 
-//std::ofstream dist("distor_hier.txt");
-
 template<class Record>
 void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
                                                 const int start_pid,
@@ -344,14 +342,8 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
     cblas_sgemv(CblasRowMajor, CblasNoTrans, main_vocabs.size(), main_vocabs[0].size(), 1.0,
                 main_vocabs_matrix_, main_vocabs[0].size(), &(current_point[0]), 1, 1, &(main_products[0]), 1);
     for (int main_cid = 0; main_cid < main_vocabs.size(); ++main_cid) {
-      //main_products[main_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
-      //                                     1, &(main_vocabs[main_cid][0]), 1);
       distance_to_clusterId[main_cid] = std::make_pair(main_norms_[main_cid] / 2 - main_products[main_cid], main_cid);
     }
-    //for (int res_cid = 0; res_cid < res_vocabs.size(); ++res_cid) {
-    //  res_products[res_cid] = cblas_sdot(current_point.size(), &(current_point[0]),
-    //                                       1, &(res_vocabs[res_cid][0]), 1);
-    //}
     cblas_sgemv(CblasRowMajor, CblasNoTrans, res_vocabs.size(), res_vocabs[0].size(), 1.0,
                 res_vocabs_matrix_, res_vocabs[0].size(), &(current_point[0]), 1, 1, &(res_products[0]), 1);
     std::sort(distance_to_clusterId.begin(), distance_to_clusterId.end());
@@ -377,15 +369,8 @@ void Indexer<Record>::GetQuantizationsForSubset(const string& points_filename,
     quantization[0] = optimal_main;
     transposed_quantizations->at(1)[start_pid + point_number] = optimal_res;
     quantization[1] = optimal_res;
-    // just for testing
-    //cblas_saxpy(current_point.size(), -1, &(main_vocabs[optimal_main][0]), 1, &(current_point[0]), 1);
-    //float distors1 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
-    //cblas_saxpy(current_point.size(), -1, &(res_vocabs[optimal_res][0]), 1, &(current_point[0]), 1);
-    //float distors2 = cblas_sdot(current_point.size(), &(current_point[0]), 1, &(current_point[0]), 1);
-    //
     int global_index = point_in_cells_count_.GetCellGlobalIndex(quantization);
     cell_counts_mutex_.lock();
-    //dist << distors1 << " " << distors2 << std::endl; // debugging
     ++(point_in_cells_count_.table[global_index]);
     cell_counts_mutex_.unlock();
   }
