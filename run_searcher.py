@@ -18,13 +18,13 @@ query_input_type = 'BVEC'
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1M'
+prefix = 'sift1B'
 
 # dimension of input space
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 4096
+coarse_vocabs_size = 16384
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -39,7 +39,7 @@ subspace_centroids_count = 1024
 queries_file = 'sift1B_queries.bvecs'
 
 # groundtruth file
-gnd_file = 'sift1M_groundtruth.ivecs'
+gnd_file = 'sift1B_groundtruth.ivecs'
 
 # number of queries
 queries_count = 1000

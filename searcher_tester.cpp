@@ -137,7 +137,7 @@ void TestSearcher(TSearcher& searcher,
   vector<double> recalls(5, 0.0);
   vector<DistanceToPoint> result;
   vector<int> counts;
-  for(int i = 0; i < 16; ++i){
+  for(int i = 0; i < 21; ++i){
       counts.push_back(std::pow(2.0,i));
   }
   //counts.push_back(neighbours_count);
