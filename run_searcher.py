@@ -48,7 +48,7 @@ queries_count = 1000
 neighbors_count = 10000
 
 # should we rerank ?
-do_rerank = 0
+do_rerank = 1
 
 # postfix added by users to all multiindex files
 user_added_postfix = ''
