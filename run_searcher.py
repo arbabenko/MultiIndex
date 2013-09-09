@@ -24,7 +24,7 @@ prefix = 'sift1M'
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 4096
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -42,7 +42,7 @@ queries_file = 'sift1B_queries.bvecs'
 gnd_file = 'sift1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 1000
+queries_count = 100
 
 # number of neighbors to seek
 neighbors_count = 10000

@@ -39,7 +39,7 @@ subspace_centroids_count = 1024
 queries_file = 'vlad1M_queries.fvecs'
 
 # groundtruth file
-gnd_file = 'vlad1M_groundtruth.ivecs'
+gnd_file = 'vlad1M_groundtruth0.ivecs'
 
 # number of queries
 queries_count = 100
