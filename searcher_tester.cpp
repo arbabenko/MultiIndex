@@ -134,7 +134,6 @@ void TestSearcher(TSearcher& searcher,
                 subspaces_centroids_count,
                 do_rerank);
   cout << "Searcher inited ...\n";
-  vector<double> recalls(5, 0.0);
   vector<DistanceToPoint> result;
   vector<int> counts;
   for(int i = 0; i < 21; ++i){
@@ -143,16 +142,18 @@ void TestSearcher(TSearcher& searcher,
   //counts.push_back(neighbours_count);
   for(int k = 0; k < counts.size(); ++k) {
     float recall = 0.0;
+    vector<double> recalls(5, 0.0);
     clock_t start = clock();
     for(int i = 0; i < queries_count; ++i) {
       std::cout << i << std::endl;
       neighbours_count = counts[k];
+      result.clear();
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
-      //recalls[0] += GetRecallAt(1, groundtruth[i], result);
-      //recalls[1] += GetRecallAt(10, groundtruth[i], result);
-      //recalls[2] += GetRecallAt(100, groundtruth[i], result);
-      //recalls[3] += GetRecallAt(1000, groundtruth[i], result);
-      //recalls[4] += GetRecallAt(10000, groundtruth[i], result);
+      recalls[0] += GetRecallAt(1, groundtruth[i], result);
+      recalls[1] += GetRecallAt(10, groundtruth[i], result);
+      recalls[2] += GetRecallAt(100, groundtruth[i], result);
+      recalls[3] += GetRecallAt(1000, groundtruth[i], result);
+      recalls[4] += GetRecallAt(10000, groundtruth[i], result);
       recall += GetRecallAt(result.size(), groundtruth[i], result);
       result.clear();
     }

@@ -12,19 +12,19 @@ build_folder = './build_master'
 bigann_root = '/sata/ResearchData/BigAnn'
 
 # input query point type (BVEC or FVEC)
-query_input_type = 'BVEC'
+query_input_type = 'FVEC'
 
 # Multi-1 or Multi-2 or Multi-4
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'sift1M'
+prefix = 'vlad1M'
 
 # dimension of input space
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 16384
+coarse_vocabs_size = 4096
 
 # fine vocabs count
 fine_vocabs_count = 8
@@ -36,13 +36,13 @@ use_residuals = 1
 subspace_centroids_count = 1024
 
 # queries file
-queries_file = 'sift1B_queries.bvecs'
+queries_file = 'vlad1M_queries.fvecs'
 
 # groundtruth file
-gnd_file = 'sift1M_groundtruth.ivecs'
+gnd_file = 'vlad1M_groundtruth.ivecs'
 
 # number of queries
-queries_count = 1000
+queries_count = 100
 
 # number of neighbors to seek
 neighbors_count = 10000
@@ -70,7 +70,7 @@ filename_prefix = prefix + '_' + multiplicity_extension + '_' + str(coarse_vocab
 launch_time = datetime.datetime.now().strftime("%I_%M_%S%p_%B_%d_%Y")
 os.system('mkdir -p ' + build_folder + '/' + launch_time)
 os.system('cp ' + build_folder + '/searcher_tester ' + build_folder + '/' + launch_time)
-os.system('cp run_searcher.py ' + build_folder + '/' + launch_time)
+os.system('cp run_searcher_vlad.py ' + build_folder + '/' + launch_time)
 report_filename = build_folder + '/' + launch_time + '/report'
 
 launch_line = build_folder + '/' + launch_time + '/searcher_tester '
