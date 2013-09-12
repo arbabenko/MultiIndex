@@ -484,7 +484,7 @@ void Indexer<Record>::FillHierIndex(const string& points_filename,
   ConvertPointsInCellsCountToCellEdges();
   multiindex_.multiindex.resize(points_count);
   cout << "Indexing started..." << endl;
-
+  cout << "Indexing started..." << endl;
   Multitable<int> points_written_in_index(multiindex_.cell_edges.dimensions);
   int thread_points_count = points_count / THREADS_COUNT;
   boost::thread_group threads;
