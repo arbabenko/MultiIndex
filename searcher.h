@@ -371,10 +371,6 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, i
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
   if(do_rerank_) {
-    //if(neighbours->size() > 10000) {
-    //  std::nth_element(neighbours->begin(), neighbours->begin() + 10000, neighbours->end());
-    //  neighbours->resize(10000);
-    //}
     std::sort(neighbours->begin(), neighbours->end());
   }
   clock_t finish = clock();
