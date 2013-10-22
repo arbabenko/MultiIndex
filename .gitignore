@@ -1,2 +1,4 @@
 html/
 build
+run_indexer_vlad.py
+run_searcher_vlad.py

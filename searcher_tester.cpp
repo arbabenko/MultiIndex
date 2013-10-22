@@ -149,19 +149,19 @@ void TestSearcher(TSearcher& searcher,
       neighbours_count = counts[k];
       result.clear();
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
-      recalls[0] += GetRecallAt(1, groundtruth[i], result);
-      recalls[1] += GetRecallAt(10, groundtruth[i], result);
-      recalls[2] += GetRecallAt(100, groundtruth[i], result);
-      recalls[3] += GetRecallAt(1000, groundtruth[i], result);
-      recalls[4] += GetRecallAt(10000, groundtruth[i], result);
+    //  recalls[0] += GetRecallAt(1, groundtruth[i], result);
+    //  recalls[1] += GetRecallAt(10, groundtruth[i], result);
+    //  recalls[2] += GetRecallAt(100, groundtruth[i], result);
+    //  recalls[3] += GetRecallAt(1000, groundtruth[i], result);
+    //  recalls[4] += GetRecallAt(10000, groundtruth[i], result);
       recall += GetRecallAt(result.size(), groundtruth[i], result);
       result.clear();
     }
-    //cout << "R@1 "     << recalls[0] / queries_count << "\n" <<
-    //        "R@10 "    << recalls[1] / queries_count << "\n" <<
-    //        "R@100 "   << recalls[2] / queries_count << "\n" <<
-    //        "R@1000 "  << recalls[3] / queries_count << "\n" <<
-    //        "R@10000 " << recalls[4] / queries_count << endl;
+  //  cout << "R@1 "     << recalls[0] / queries_count << "\n" <<
+  //          "R@10 "    << recalls[1] / queries_count << "\n" <<
+  //          "R@100 "   << recalls[2] / queries_count << "\n" <<
+  //          "R@1000 "  << recalls[3] / queries_count << "\n" <<
+  //          "R@10000 " << recalls[4] / queries_count << endl;
     cout << "R@" << neighbours_count << " " << recall / queries_count << endl;
     searcher.GetPerfTester().DoReport();
     clock_t finish = clock();

@@ -18,7 +18,7 @@ query_input_type = 'FVEC'
 multiplicity = 2
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'vlad1M'
+prefix = 'vlad500K'
 
 # dimension of input space
 space_dim = 128
@@ -33,16 +33,16 @@ fine_vocabs_count = 8
 use_residuals = 1
 
 # number of centroids handled in each subdimension
-subspace_centroids_count = 1024
+subspace_centroids_count = 4096
 
 # queries file
 queries_file = 'vlad1M_queries.fvecs'
 
 # groundtruth file
-gnd_file = 'vlad1M_groundtruth0.ivecs'
+gnd_file = 'vlad500K_groundtruth.ivecs'
 
 # number of queries
-queries_count = 100
+queries_count = 1000
 
 # number of neighbors to seek
 neighbors_count = 10000

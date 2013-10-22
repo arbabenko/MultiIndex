@@ -163,7 +163,7 @@ Distance Eucldistance(const Point& x, const Point& y, Dimensions start, Dimensio
  */
 template<class T, class U>
 inline U Round(T number) {
-  return (U)(number + 0.5);
+  return (U)(number);
 }
 
 /**

@@ -21,13 +21,13 @@ bigann_root = '/sata/ResearchData/BigAnn'
 input_type = 'FVEC'
 
 # file with input point (.bvecs or .fvecs)
-points_file = 'vlad1M_base.fvecs'
+points_file = 'vlad500K_base.fvecs'
 
 # prefix of all vocabs, coarse quantizations, etc.
-prefix = 'vlad1M'
+prefix = 'vlad500K'
 
 # input points count
-points_count = 1000000
+points_count = 500000
 
 # dimension of input space
 space_dim = 128

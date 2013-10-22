@@ -33,7 +33,7 @@ points_count = 1000000
 space_dim = 128
 
 # coarse vocabs size
-coarse_vocabs_size = 4096
+coarse_vocabs_size = 16384
 
 # fine vocabs count
 fine_vocabs_count = 8
