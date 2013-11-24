@@ -425,7 +425,7 @@ inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Coord* point
 
 template class MultiSearcher<RerankADC8, PointId>;
 template class MultiSearcher<RerankADC16, PointId>;
-template class MultiSearcher<PointId, PointId>;
+//template class MultiSearcher<PointId, PointId>;
 
 #endif
 
