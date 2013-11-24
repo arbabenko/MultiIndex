@@ -225,7 +225,6 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
     fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
   }
   fclose(rerank_vocabs_file);
-  multiindex_.cell_edges.table.size() = std::pow((float)coarseK, coarseM);
   fillVector<int>(cell_edges_filename, &(multiindex_.cell_edges.table));
   fillVector<Record>(index_filename, &(multiindex_.multiindex));
   PrecomputeData();
