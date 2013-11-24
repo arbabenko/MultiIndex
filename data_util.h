@@ -435,6 +435,67 @@ struct RerankADC16 {
   }
 };
 
+template<class T>
+inline T readFromFile(std::ifstream& input) {
+    T result;
+    input.read((char*)&result, sizeof(T));
+    return result;
+}
+
+template<>
+inline RerankADC8 readFromFile(std::ifstream& input) {
+    RerankADC8 record;
+    input.read((char*)&(record.pid), sizeof(int));
+    for(int q = 0; q < 8; ++q){
+        input.read((char*)&(record.quantizations[q]), sizeof(unsigned char));
+    }
+    return record;
+}
+
+template<>
+inline RerankADC16 readFromFile(std::ifstream& input) {
+    RerankADC16 record;
+    input.read((char*)&(record.pid), sizeof(int));
+    for(int q = 0; q < 16; ++q){
+        input.read((char*)&(record.quantizations[q]), sizeof(unsigned char));
+    }
+    return record;
+}
+
+
+template<class T>
+void readSubVector(const string& filename,
+                   int start_record_id,
+                   int chunk_size,
+                   int records_count,
+                   vector<T>* output) {
+    chunk_size = std::min(records_count - start_record_id, chunk_size);
+    std::ifstream input(filename.c_str(), ios::binary | ios::in);
+    input.seekg(start_record_id * sizeof(T));
+    for(int i = 0; i < chunk_size; ++i) {
+      output->at(start_record_id + i) = readFromFile<T>(input);
+    }
+}
+
+template<class T>
+void fillVector(const string& filename,
+                int treads_count,
+                vector<T>* output) {
+  std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
+  in.seekg(0, std::ifstream::end);
+  int records_count = in.tellg() / sizeof(T);
+  in.close();
+  output->resize(records_count);
+  int chunk_size = records_count / treads_count;
+  boost::thread_group index_threads;
+  for(int thread_id = 0; thread_id < treads_count; ++thread_id) {
+    int start_record_id = chunk_size * thread_id;
+    index_threads.create_thread(boost::bind(&readSubVector<T>, filename, start_record_id,
+                                            chunk_size, output));
+  }
+  index_threads.join_all();
+}
+
 
 
 
