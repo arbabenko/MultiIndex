@@ -70,6 +70,7 @@ int coarseM = 2;
 int coarseK = 16384;
 int rerankM = 8;
 int rerankK = 256;
+int THREADS_COUNT = 32;
 
 
 
