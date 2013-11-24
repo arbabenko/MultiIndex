@@ -481,7 +481,7 @@ template<class T>
 void fillVector(const string& filename,
                 int treads_count,
                 vector<T>* output) {
-  std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
+  std::ifstream in(filename.c_str(), std::ifstream::in | std::ifstream::binary);
   in.seekg(0, std::ifstream::end);
   int records_count = in.tellg() / sizeof(T);
   in.close();
@@ -490,7 +490,7 @@ void fillVector(const string& filename,
   boost::thread_group index_threads;
   for(int thread_id = 0; thread_id < treads_count; ++thread_id) {
     int start_record_id = chunk_size * thread_id;
-    index_threads.create_thread(boost::bind(&readSubVector<T>, filename, start_record_id,
+    index_threads.create_thread(boost::bind(readSubVector<T>, filename, start_record_id,
                                             chunk_size, output));
   }
   index_threads.join_all();
