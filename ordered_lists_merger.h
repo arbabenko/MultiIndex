@@ -91,7 +91,7 @@ void OrderedListsMerger<OrderType, MetaInfo>::setLists(const vector<vector<pair<
   for(int list_index = 0; list_index < lists.size(); ++list_index) {
     first_item_indices[list_index] = 0;
   }
-  memset(&(yielded_items_indices_.table[0]), 0, yielded_items_indices_.table.size());
+  memset(&(yielded_items_indices_.table[0]), 0, yielded_items_indices_.length);
   InsertMergedItemIndicesInHeap(first_item_indices);
 }
 

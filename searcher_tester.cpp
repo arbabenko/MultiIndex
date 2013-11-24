@@ -17,19 +17,18 @@ Dimensions SPACE_DIMENSION;
 /**
  * File with vocabularies for multiindex structure
  */
-string coarse_vocabs_file;
-/**
- * File with vocabularies for reranking
- */
-string fine_vocabs_file;
+
+string index_filename;
+string cell_edges_filename;
+string coarse_rotation_filename;
+string rerank_rotations_filename;
+string coarse_vocabs_filename;
+string rerank_vocabs_filename;
+            
 /**
  * Reranking approach, should be USE_RESIDUALS or USE_INIT_POINTS
  */
 RerankMode mode;
-/**
- * Common prefix of all multiindex files
- */
-string index_files_prefix;
 /**
  * File with queries (.bvec or .fvec)
  */
@@ -77,13 +76,17 @@ int rerankK = 256;
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
   description.add_options()
-    ("index_files_prefix,i", value<string>())
+    ("index_file", value<string>())
+    ("cell_edges", value<string>())
+    ("coarse_vocabs_file", value<string>())
+    ("rerank_vocabs_file", value<string>())
+    ("rerank_rotation_file", value<string>())
+    ("coarse_rotation_file", value<string>())
     ("queries_file,q", value<string>())
     ("queries_count,n", value<int>())
     ("neighbours_count,k", value<int>())
     ("groundtruth_file,g", value<string>())
-    ("coarse_vocabs_file,c", value<string>())
-    ("fine_vocabs_file,f", value<string>())
+
     ("query_point_type,t", value<string>())
     ("do_rerank,l", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
@@ -113,11 +116,13 @@ int SetOptions(int argc, char** argv) {
     cout << description << "\n";
     return 1;
   }
-
-  coarse_vocabs_file =         name_to_value["coarse_vocabs_file"].as<string>();
-  fine_vocabs_file =           name_to_value["fine_vocabs_file"].as<string>();
+  index_filename =             name_to_value["index_file"].as<string>();
+  cell_edges_filename =        name_to_value["cell_edges"].as<string>();
+  coarse_vocabs_filename =     name_to_value["coarse_vocabs_file"].as<string>();
+  rerank_vocabs_filename =     name_to_value["rerank_vocabs_file"].as<string>();
+  rerank_rotations_filename =  name_to_value["rerank_rotation_file"].as<string>();
+  coarse_rotation_filename =   name_to_value["coarse_rotation_filename"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
-  index_files_prefix =         name_to_value["index_files_prefix"].as<string>();
   queries_file =               name_to_value["queries_file"].as<string>();
   report_file =                name_to_value["report_file"].as<string>();
   groundtruth_file =           name_to_value["groundtruth_file"].as<string>();
@@ -140,8 +145,13 @@ template<class TSearcher>
 void TestSearcher(TSearcher& searcher,
                   const Points& queries,
                   const vector<vector<PointId> >& groundtruth) {
-  searcher.Init(index_files_prefix, coarse_vocabs_file,
-                fine_vocabs_file, mode,
+  searcher.Init(index_filename,
+                cell_edges_filename,
+                coarse_rotation_filename,
+                rerank_rotations_filename,
+                coarse_vocabs_filename,
+                rerank_vocabs_filename
+                mode,
                 subspaces_centroids_count,
                 do_rerank);
   cout << "Searcher inited ...\n";
@@ -184,12 +194,12 @@ int main(int argc, char** argv) {
   ReadPoints<int, PointId>(groundtruth_file, &groundtruth, queries_count);
   MKL_Set_Num_Threads(1);
   cout << "Groundtruth is read ...\n";
-  vector<Centroids> fine_vocabs;
-  ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
-  if(fine_vocabs.size() == 8) {
+  //vector<Centroids> fine_vocabs;
+  //ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
+  if(rerankM == 8) {
     MultiSearcher<RerankADC8, PointId> searcher(multiplicity);
     TestSearcher<MultiSearcher<RerankADC8, PointId> > (searcher, queries, groundtruth);
-  } else if(fine_vocabs.size() == 16) {
+  } else if(rerankM == 16) {
     MultiSearcher<RerankADC16, PointId> searcher(multiplicity);
     TestSearcher<MultiSearcher<RerankADC16, PointId> > (searcher, queries, groundtruth);
   }
