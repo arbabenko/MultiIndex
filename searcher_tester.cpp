@@ -150,7 +150,7 @@ void TestSearcher(TSearcher& searcher,
                 coarse_rotation_filename,
                 rerank_rotations_filename,
                 coarse_vocabs_filename,
-                rerank_vocabs_filename
+                rerank_vocabs_filename,
                 mode,
                 subspaces_centroids_count,
                 do_rerank);

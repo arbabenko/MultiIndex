@@ -74,7 +74,7 @@ class MultiSearcher {
   * @param subpace_centroids_to_consider it defines the size of working index table
   * @param neighbours result - vector of point identifiers ordered by increasing of distance to query
   */
-  void GetNearestNeighbours(const Point& point, int k, 
+  void GetNearestNeighbours(Point& point, int k, 
                             vector<pair<Distance, MetaInfo> >* neighbours) const;
  /**
   * Returns searcher perfomance tester
@@ -229,8 +229,8 @@ void readSubVector(const string& filename,
 }
 
 template<class T>
-void fillVector<T>(const string& filename,
-                   vector<T>* output) {
+void fillVector(const string& filename,
+                vector<T>* output) {
   std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
   in.seekg(0, std::ifstream::end);
   int records_count = in.tellg() / sizeof(T);
@@ -259,26 +259,28 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   do_rerank_ = do_rerank;
   subspace_centroids_to_consider_ = subspace_centroids_to_consider;
   rerank_mode_ = mode;
-  merger_.GetYieldedItems().table.resize(std::pow((float)subspace_centroids_to_consider,
-		                                         (int)coarse_vocabs_.size()));
+  merger_.GetYieldedItems().length = std::pow((float)subspace_centroids_to_consider,
+		                                         (int)coarse_vocabs_.size());
+  merger_.GetYieldedItems().table = new int(merger_.GetYieldedItems().length);
   for(int i = 0; i < multiplicity_; ++i) {
     merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
   }
-  fvecs_fread(fopen(coarse_rotation_filename, "r"), coarse_rotation_, dim, dim);
-  FILE* rerank_matrix_file = fopen(rerank_rotations_filename, "r");
+  fvecs_fread(fopen(coarse_rotation_filename.c_str(), "r"), coarse_rotation_,
+              SPACE_DIMENSION, SPACE_DIMENSION);
+  FILE* rerank_matrix_file = fopen(rerank_rotations_filename.c_str(), "r");
   residuals_rotations_.resize(multiplicity_);
   for (int m = 0; m < multiplicity_; ++m){
     fvecs_fread(rerank_matrix_file, residuals_rotations_[m], 
                 SPACE_DIMENSION / multiplicity_, SPACE_DIMENSION / multiplicity_);
   }
   fclose(rerank_matrix_file);
-  FILE* coarse_vocabs_file = fopen(coarse_vocabs_filename, "r");
+  FILE* coarse_vocabs_file = fopen(coarse_vocabs_filename.c_str(), "r");
   coarse_vocabs_.resize(multiplicity_);
   for (int m = 0; m < multiplicity_; ++m){
     fvecs_fread(coarse_vocabs_file, coarse_vocabs_[m], coarseK, SPACE_DIMENSION / multiplicity_);
   }
   fclose(coarse_vocabs_file);
-  FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename, "r");
+  FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename.c_str(), "r");
   fine_vocabs_.resize(rerankM);
   for (int m = 0; m < rerankM; ++m){
     fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
@@ -303,7 +305,7 @@ void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
     }
   }
   products_ = new Coord[coarseK];
-  residual_ = new Coord[dim];
+  residual_ = new Coord[SPACE_DIMENSION];
 }
 
 template<class Record, class MetaInfo>
@@ -400,7 +402,7 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
 
 
 template<class Record, class MetaInfo>
-void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, int k, 
+void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k, 
                                                            vector<pair<Distance, MetaInfo> >* neighbours) const {
   assert(k > 0);
   perf_tester_.handled_queries_count += 1;
