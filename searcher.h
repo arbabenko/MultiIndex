@@ -200,9 +200,7 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   do_rerank_ = do_rerank;
   subspace_centroids_to_consider_ = subspace_centroids_to_consider;
   rerank_mode_ = mode;
-  merger_.GetYieldedItems().table.size() = std::pow((float)subspace_centroids_to_consider,
-		                                         (int)coarse_vocabs_.size());
-  merger_.GetYieldedItems().table = new char(merger_.GetYieldedItems().table.size());
+  merger_.GetYieldedItems().table = vector<char>(std::pow((float)subspace_centroids_to_consider, coarseM));
   for(int i = 0; i < multiplicity_; ++i) {
     merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
   }
