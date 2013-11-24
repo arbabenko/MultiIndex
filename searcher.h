@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <map>
 
+#include <yael/vector.h>
+
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
@@ -25,6 +27,13 @@ extern Dimensions SPACE_DIMENSION;
 
 extern enum PointType point_type;
 
+extern int coarseM;
+extern int coarseK;
+extern int rerankM;
+extern int rerankK;
+
+int vocPerCoarse = rerankM / coarseM;
+
 /**
  * \typedef This typedef is used in the first stage of search when
  * we get nearest centroids for each coarse subpace
@@ -40,7 +49,7 @@ class MultiSearcher {
  /**
   * Default constructor
   */
-  MultiSearcher();
+   MultiSearcher(int multiplicity) : multiplicity_(multiplicity);
  /**
   * Initiation function
   * @param index_files_prefix prefix of multiindex files providing the search
@@ -49,9 +58,12 @@ class MultiSearcher {
   * @param mode reranking approach
   * @param do_rerank should algorithm rerank short list or not
   */
-  void Init(const string& index_files_prefix,
+  void Init(const string& index_filename,
+            const string& cell_edges_filename
+            const string& coarse_rotation_filename,
+            const string& rerank_rotations_filename,
             const string& coarse_vocabs_filename,
-            const string& fine_vocabs_filename,
+            const string& rerank_vocabs_filename,
             const RerankMode& mode,
             const int subspace_centroids_to_consider,
             bool do_rerank);
@@ -69,15 +81,6 @@ class MultiSearcher {
   */
   PerfTester& GetPerfTester();
  private:
- /**
-  * This functions deserializes all structures for search
-  * @param index_files_prefix prefix of multiindex files providing the search
-  * @param coarse_vocabs_filename file with coarse vocabs
-  * @param fine_vocabs_filename file with fine vocabs for reranking
-  */
-  void DeserializeData(const string& index_files_prefix,
-                       const string& coarse_vocabs_filename,
-                       const string& fine_vocabs_filename);
  /**
   * Function gets some nearest centroids for each coarse subspace
   * @param point query point
@@ -103,19 +106,20 @@ class MultiSearcher {
   */
 inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
                                           int* cell_start, int* cell_finish) const;
+  int multiplicity_;
  /**
   * This fuctions converts complex objects to arrays and
   * pointers for usage in BLAS
   */
-  void InitBlasStructures();
+  void PrecomputeData();
  /**
   * Lists of coarse centroids
   */
-  vector<Centroids> coarse_vocabs_;
+  vector<float*> coarse_vocabs_;
  /**
   * Lists of fine centroids
   */
-  vector<Centroids> fine_vocabs_;
+  vector<float*> fine_vocabs_;
  /**
   * Merger for ordered merging subspaces centroids lists
   */
@@ -143,19 +147,11 @@ inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
  /**
   * Struct for BLAS
   */
-  vector<float*> coarse_vocabs_matrices_;
- /**
-  * Struct for BLAS
-  */
   vector<vector<float> > coarse_centroids_norms_;
  /**
   * Struct for BLAS
   */
   mutable Coord* products_;
- /**
-  * Struct for BLAS
-  */
-  mutable vector<Coord> query_norms_;
  /**
   * Struct for BLAS
   */
@@ -169,6 +165,15 @@ inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
   * Number of neighbours found to this moment
   */
   mutable int found_neghbours_count_;
+ /**
+  * Rotation of initial vectors (OPQ)
+  */
+  float* coarse_rotation_;
+ /**
+  * Rotation of residuals (OPQ)
+  */
+  vector<float*> residuals_rotations_;
+
 };
 
 template<class Record, class MetaInfo>
@@ -176,7 +181,7 @@ inline void RecordToMetainfoAndDistance(const Coord* point,
                                         const Record& record,
                                         pair<Distance, MetaInfo>* result,
                                         const vector<int>& cell_coordinates,
-                                        const vector<Centroids>& fine_vocabs) {
+                                        const vector<float*>& fine_vocabs) {
 }
 
 /////////////// IMPLEMENTATION /////////////////////
@@ -185,69 +190,123 @@ template<class Record, class MetaInfo>
 MultiSearcher<Record, MetaInfo>::MultiSearcher() {
 }
 
-template<class Record, class MetaInfo>
-void MultiSearcher<Record, MetaInfo>::DeserializeData(const string& index_files_prefix,
-                                                      const string& coarse_vocabs_filename,
-                                                      const string& fine_vocabs_filename) {
-  cout << "Data deserializing started...\n";
-  ifstream cell_edges(string(index_files_prefix + "_cell_edges.bin").c_str(), ios::binary);
-  if(!cell_edges.good()) {
-    throw std::logic_error("Bad input cell edges stream");
+template<class T>
+inline T readFromFile(std::ifstream& input) {
+    T result;
+    input.read((char*)&result, sizeof(T));
+    return result;
+}
+
+template<>
+inline RerankADC8 readFromFile(std::ifstream& input) {
+    RerankADC8 record;
+    input.read((char*)&(record.pid), sizeof(int));
+    for(q = 0; q < 8; ++q){
+        input.read((char*)&(record.quantizations[q]), sizeof(unsigned char));
+    }
+    return record;
+}
+
+template<>
+inline RerankADC16 readFromFile(std::ifstream& input) {
+    RerankADC16 record;
+    input.read((char*)&(record.pid), sizeof(int));
+    for(q = 0; q < 16; ++q){
+        input.read((char*)&(record.quantizations[q]), sizeof(unsigned char));
+    }
+    return record;
+}
+
+
+template<class T>
+void readSubVector(const string& filename,
+                   int start_record_id,
+                   int chunk_size,
+                   int records_count,
+                   vector<T>* output) {
+    chunk_size = std::min(records_count - start_record_id, chunk_size);
+    std::ifstream input(filename.c_str(), ios::binary | ios::in);
+    input.seekg(start_record_id * sizeof(T));
+    for(int i = 0; i < chunk_size; ++i) {
+      output->at(start_record_id + i) = readFromFile(input);
+    }
+}
+
+template<class T>
+void fillVector<T>(const string& filename,
+                   vector<T>* output) {
+  std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
+  in.seekg(0, std::ifstream::end);
+  records_count = in.tellg() / sizeof(T);
+  in.close();
+  output->resize(records_count);
+  int chunk_size = records_count / THREADS_COUNT;
+  boost::thread_group index_threads;
+  for(int thread_id = 0; thread_id < THREADS_COUNT; ++thread_id) {
+    int start_record_id = chunk_size * thread_id;
+    index_threads.create_thread(boost::bind(&readSubVector, filename, start_record_id,
+                                            chunk_size, output));
   }
-  boost::archive::binary_iarchive arc_cell_edges(cell_edges);
-  arc_cell_edges >> multiindex_.cell_edges;
-  cout << "Cell edges deserialized...\n";
-  ifstream multi_array(string(index_files_prefix + "_multi_array.bin").c_str(), ios::binary);
-  if(!multi_array.good()) {
-    throw std::logic_error("Bad input cell edges stream");
-  }
-  boost::archive::binary_iarchive arc_multi_array(multi_array);
-  arc_multi_array >> multiindex_.multiindex;
-  cout << "Multiindex deserialized...\n";
-  ReadVocabularies<float>(coarse_vocabs_filename, SPACE_DIMENSION, &coarse_vocabs_);
-  cout << "Coarse vocabs deserialized...\n";
-  ReadFineVocabs<float>(fine_vocabs_filename, &fine_vocabs_);
-  cout << "Fine vocabs deserialized...\n";
+  index_threads.join_all();
 }
 
 template<class Record, class MetaInfo>
-void MultiSearcher<Record, MetaInfo>::Init(const string& index_files_prefix,
+void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
+                                           const string& cell_edges_filename
+                                           const string& coarse_rotation_filename,
+                                           const string& rerank_rotations_filename,
                                            const string& coarse_vocabs_filename,
-                                           const string& fine_vocabs_filename,
+                                           const string& rerank_vocabs_filename,
                                            const RerankMode& mode,
                                            const int subspace_centroids_to_consider,
-                                           const bool do_rerank) {
+                                           bool do_rerank) {
   do_rerank_ = do_rerank;
-  index_files_prefix_ = index_files_prefix;
   subspace_centroids_to_consider_ = subspace_centroids_to_consider;
-  DeserializeData(index_files_prefix, coarse_vocabs_filename, fine_vocabs_filename);
   rerank_mode_ = mode;
   merger_.GetYieldedItems().table.resize(std::pow((float)subspace_centroids_to_consider,
 		                                         (int)coarse_vocabs_.size()));
-  for(int i = 0; i < coarse_vocabs_.size(); ++i) {
+  for(int i = 0; i < multiplicity_; ++i) {
     merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
   }
-  InitBlasStructures();
+  fvecs_fread(fopen(coarse_rotation_filename, "r"), coarse_rotation_, dim, dim);
+  FILE* rerank_matrix_file = fopen(rerank_rotations_filename, "r");
+  residuals_rotations_.resize(multiplicity_);
+  for (int m = 0; m < multiplicity_; ++m){
+    fvecs_fread(rerank_matrix_file, residuals_rotations_[m], 
+                SPACE_DIMENSION / multiplicity_, SPACE_DIMENSION / multiplicity_);
+  }
+  fclose(rerank_matrix_file);
+  FILE* coarse_vocabs_file = fopen(coarse_vocabs_filename, "r");
+  coarse_vocabs_.resize(multiplicity_);
+  for (int m = 0; m < multiplicity_; ++m){
+    fvecs_fread(coarse_vocabs_file, coarse_vocabs_[m], coarseK, SPACE_DIMENSION / multiplicity_);
+  }
+  fclose(coarse_vocabs_file);
+  FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename, "r");
+  fine_vocabs_.resize(rerankM);
+  for (int m = 0; m < rerankM; ++m){
+    fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
+  }
+  fclose(rerank_vocabs_file);
+  multiindex_.cell_edges.length = std::pow((float)coarseK, coarseM);
+  fillVector<int>(cell_edges_filename, &(multiindex_.cell_edges.table));
+  fillVector<Record>(index_filename, &(multiindex_.multiindex));
+  PrecomputeData();
 }
 
 template<class Record, class MetaInfo>
-void MultiSearcher<Record, MetaInfo>::InitBlasStructures(){
-  coarse_vocabs_matrices_.resize(coarse_vocabs_.size());
-  coarse_centroids_norms_.resize(coarse_vocabs_.size(), vector<float>(coarse_vocabs_[0].size()));
-  for(int coarse_id = 0; coarse_id < coarse_vocabs_matrices_.size(); ++coarse_id) {
-    coarse_vocabs_matrices_[coarse_id] = new float[coarse_vocabs_[0].size() * coarse_vocabs_[0][0].size()];
-    for(int i = 0; i < coarse_vocabs_[0].size(); ++i) {
-      Coord norm = 0;
-      for(int j = 0; j < coarse_vocabs_[0][0].size(); ++j) {
-        coarse_vocabs_matrices_[coarse_id][coarse_vocabs_[0][0].size() * i + j] = coarse_vocabs_[coarse_id][i][j];
-        norm += coarse_vocabs_[coarse_id][i][j] * coarse_vocabs_[coarse_id][i][j];
-      }
-      coarse_centroids_norms_[coarse_id][i] = norm;
+void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
+  coarse_centroids_norms_.resize(coarseM, coarseK);
+  int vocab_dim = SPACE_DIMENSION / coarseM;
+  for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
+    for(int k = 0; k < coarseK; ++k) {
+      coarse_centroids_norms_[coarse_id][k] = cblas_sdot(vocab_dim, 
+                                                         coarse_vocabs_[coarse_id] + vocab_dim * k, 1,
+                                                         coarse_vocabs_[coarse_id] + vocab_dim * k, 1);
     }
   }
-  products_ = new Coord[coarse_vocabs_[0].size()];
-  query_norms_.resize(coarse_vocabs_[0].size());
-  residual_ = new Coord[coarse_vocabs_[0][0].size() * coarse_vocabs_.size()];
+  products_ = new Coord[coarseK];
+  residual_ = new Coord[dim];
 }
 
 template<class Record, class MetaInfo>
@@ -260,20 +319,18 @@ void MultiSearcher<Record, MetaInfo>::GetNearestSubspacesCentroids(const Point& 
                                                                    const int subspace_centroins_count,
                                                                    vector<NearestSubspaceCentroids>*
                                                                    subspaces_short_lists) const {
-  std::stringstream aa;
   subspaces_short_lists->resize(coarse_vocabs_.size());
   Dimensions subspace_dimension = point.size() / coarse_vocabs_.size();
   for(int subspace_index = 0; subspace_index < coarse_vocabs_.size(); ++subspace_index) {
     Dimensions start_dim = subspace_index * subspace_dimension;
     Dimensions final_dim = std::min((Dimensions)point.size(), start_dim + subspace_dimension);
-    Coord query_norm = cblas_sdot(final_dim - start_dim, &(point[start_dim]), 1, &(point[start_dim]), 1);
-    std::fill(query_norms_.begin(), query_norms_.end(), query_norm);
-    cblas_saxpy(coarse_vocabs_[0].size(), 1, &(coarse_centroids_norms_[subspace_index][0]), 1, &(query_norms_[0]), 1);
-    cblas_sgemv(CblasRowMajor, CblasNoTrans, coarse_vocabs_[0].size(), subspace_dimension, -2.0,
-                coarse_vocabs_matrices_[subspace_index], subspace_dimension, &(point[start_dim]), 1, 1, &(query_norms_[0]), 1);
-    subspaces_short_lists->at(subspace_index).resize(query_norms_.size());
-    for(int i = 0; i < query_norms_.size(); ++i) {
-      subspaces_short_lists->at(subspace_index)[i] = std::make_pair(query_norms_[i], i);
+    memset(products_, 0, sizeof(float) * coarseK);
+    cblas_saxpy(coarseK, 1, &(coarse_centroids_norms_[subspace_index][0]), 1, products_, 1);
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, coarseK, subspace_dimension, -2.0,
+                coarse_vocabs_[subspace_index], subspace_dimension, &(point[start_dim]), 1, 1, products_, 1);
+    subspaces_short_lists->at(subspace_index).resize(coarseK);
+    for(int i = 0; i < coarseK; ++i) {
+      subspaces_short_lists->at(subspace_index)[i] = std::make_pair(products_[i], i);
     }
     std::nth_element(subspaces_short_lists->at(subspace_index).begin(),
                      subspaces_short_lists->at(subspace_index).begin() + subspace_centroins_count,
@@ -321,6 +378,11 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   }
   typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
   GetResidual(point, cell_coordinates, coarse_vocabs_, residual_);
+  for(int m = 0; m < coarseM; ++m) {
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, SPACE_DIMENSION / coarseM, SPACE_DIMENSION / coarseM, 1,
+                residuals_rotations_[m], SPACE_DIMENSION / coarseM,
+                &(residual_[m * SPACE_DIMENSION / coarseM]), 1, 0, &(residual_[m * SPACE_DIMENSION / coarseM]), 1);      
+  }
   cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
     if(rerank_mode_ == USE_RESIDUALS) {
@@ -350,6 +412,9 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(const Point& point, i
   clock_t start = clock();
   perf_tester_.search_start = start;
   clock_t before = clock();
+  // rotate point (OPQ)
+  cblas_sgemv(CblasRowMajor, CblasNoTrans, SPACE_DIMENSION, SPACE_DIMENSION, 1,
+              coarse_rotation_, SPACE_DIMENSION, &(point[0]), 1, 0, &(point[0]), 1);
   vector<NearestSubspaceCentroids> subspaces_short_lists;
   assert(subspace_centroids_to_consider_ > 0);
   GetNearestSubspacesCentroids(point, subspace_centroids_to_consider_, &subspaces_short_lists);
@@ -381,23 +446,19 @@ template<>
 inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point, const RerankADC8& record,
                                                              pair<Distance, PointId>* result,
                                                              const vector<int>& cell_coordinates,
-                                                             const vector<Centroids>& fine_vocabs) {
+                                                             const vector<float*>& fine_vocabs) {
   result->second = record.pid;
-  int coarse_clusters_count = cell_coordinates.size();
-  int fine_clusters_count = fine_vocabs.size();
-  int coarse_to_fine_ratio = fine_clusters_count / coarse_clusters_count;
-  int subvectors_dim = SPACE_DIMENSION / fine_clusters_count;
+  int subvectors_dim = SPACE_DIMENSION / rerankM;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  for(int centroid_index = 0; centroid_index < fine_clusters_count; ++centroid_index) {
+  for(int centroid_index = 0; centroid_index < rerankM; ++centroid_index) {
     int start_dim = centroid_index * subvectors_dim;
     int final_dim = start_dim + subvectors_dim;
     FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
     rerank_info_ptr += sizeof(FineClusterId);
-    int current_coarse_index = centroid_index / coarse_to_fine_ratio;
     Distance subvector_distance = 0;
     for(int i = start_dim; i < final_dim; ++i) {
-      Coord diff = fine_vocabs[centroid_index][pid_nearest_centroid][i - start_dim] - point[i];
-        subvector_distance += diff * diff;
+      Coord diff = fine_vocabs[centroid_index][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+      subvector_distance += diff * diff;
     }
     result->first += subvector_distance;
   }
@@ -407,22 +468,18 @@ template<>
 inline void RecordToMetainfoAndDistance<RerankADC16, PointId>(const Coord* point, const RerankADC16& record,
                                                               pair<Distance, PointId>* result,
                                                               const vector<int>& cell_coordinates,
-                                                              const vector<Centroids>& fine_vocabs) {
+                                                              const vector<float*>& fine_vocabs) {
   result->second = record.pid;
-  int coarse_clusters_count = cell_coordinates.size();
-  int fine_clusters_count = fine_vocabs.size();
-  int coarse_to_fine_ratio = fine_clusters_count / coarse_clusters_count;
-  int subvectors_dim = SPACE_DIMENSION / fine_clusters_count;
+  int subvectors_dim = SPACE_DIMENSION / rerankM;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  for(int centroid_index = 0; centroid_index < fine_clusters_count; ++centroid_index) {
+  for(int centroid_index = 0; centroid_index < rerankM; ++centroid_index) {
     int start_dim = centroid_index * subvectors_dim;
     int final_dim = start_dim + subvectors_dim;
     FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
     rerank_info_ptr += sizeof(FineClusterId);
-    int current_coarse_index = centroid_index / coarse_to_fine_ratio;
     Distance subvector_distance = 0;
     for(int i = start_dim; i < final_dim; ++i) {
-      Coord diff = fine_vocabs[centroid_index][pid_nearest_centroid][i - start_dim] - point[i];
+      Coord diff = fine_vocabs[centroid_index][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
       subvector_distance += diff * diff;
     }
     result->first += subvector_distance;

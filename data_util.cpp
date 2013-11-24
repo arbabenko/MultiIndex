@@ -82,6 +82,18 @@ void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizati
   }
 }
 
+void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
+                 const vector<float*>& centroids, Coord* residual) {
+  Dimensions subvector_dimension = point.size() / centroids.size();
+  cblas_scopy(point.size(), &(point[0]), 1, residual, 1);
+  for(int subvector_index = 0; subvector_index < centroids.size(); ++subvector_index) {
+    Dimensions start_dim = subvector_index * subvector_dimension;
+    cblas_saxpy(subvector_dimension, -1,
+                centroids[subvector_index] + subvector_dimension * coarse_quantizations[subvector_index], 
+                1, &(residual[start_dim]), 1);
+  }
+}
+
 void GetNearestClusterIdsForPointSubset(const Points& points, const Centroids& centroids,
                                         const PointId start_pid, const PointId final_pid,
                                         vector<ClusterId>* nearest) {

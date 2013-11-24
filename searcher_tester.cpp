@@ -11,7 +11,7 @@
 using namespace boost::program_options;
 
 /**
- * Number of threads for indexing
+ * Dimensionality
  */
 Dimensions SPACE_DIMENSION;
 /**
@@ -62,6 +62,15 @@ string report_file;
  * Number of nearest centroids for each group of dimensions to handle
  */
 int subspaces_centroids_count;
+/**
+ * Multiplicity
+ */
+int multiplicity;
+
+int coarseM = 2;
+int coarseK = 16384;
+int rerankM = 8;
+int rerankK = 256;
 
 
 
@@ -81,6 +90,7 @@ int SetOptions(int argc, char** argv) {
     ("points_count,p", value<int>())
     ("report_file,o", value<string>())
     ("space_dim,d", value<int>())
+    ("multi,m", value<int>())
     ("subspaces_centroids_count,s", value<int>());
   variables_map name_to_value;
   try {
@@ -114,6 +124,7 @@ int SetOptions(int argc, char** argv) {
   queries_count =              name_to_value["queries_count"].as<int>();
   neighbours_count =           name_to_value["neighbours_count"].as<int>();
   subspaces_centroids_count =  name_to_value["subspaces_centroids_count"].as<int>();
+  multiplicity =               name_to_value["multi"].as<int>();
  
   do_rerank =                  (name_to_value["do_rerank"].as<bool>() == true) ? true : false;
   mode =                       (name_to_value["use_residuals"].as<bool>() == true) ? USE_RESIDUALS : USE_INIT_POINTS;
@@ -176,10 +187,10 @@ int main(int argc, char** argv) {
   vector<Centroids> fine_vocabs;
   ReadFineVocabs<float>(fine_vocabs_file, &fine_vocabs);
   if(fine_vocabs.size() == 8) {
-    MultiSearcher<RerankADC8, PointId> searcher;
+    MultiSearcher<RerankADC8, PointId> searcher(multiplicity);
     TestSearcher<MultiSearcher<RerankADC8, PointId> > (searcher, queries, groundtruth);
   } else if(fine_vocabs.size() == 16) {
-    MultiSearcher<RerankADC16, PointId> searcher;
+    MultiSearcher<RerankADC16, PointId> searcher(multiplicity);
     TestSearcher<MultiSearcher<RerankADC16, PointId> > (searcher, queries, groundtruth);
   }
   return 0;

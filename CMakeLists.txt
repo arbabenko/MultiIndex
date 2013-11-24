@@ -33,8 +33,8 @@ SET(BOOST_DIR /usr/include/boost)
 SET(BOOST_LIB /usr/local/lib)
 ENDIF (UNIX)
 IF(WIN32)
-SET(BOOST_DIR C:/Users/arbabenko/Soft/boost_1_47_0)
-SET(BOOST_LIB C:/Users/arbabenko/Soft/boost_1_47_0/lib/x64/lib)
+SET(BOOST_DIR C:/Users/arbabenko/Soft/boost/boost_1_53_0)
+SET(BOOST_LIB C:/Users/arbabenko/Soft/boost/boost_1_53_0/build/lib)
 ENDIF(WIN32)
 
 # ADD BLAS

@@ -358,6 +358,8 @@ void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizati
  */
 void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
                  const vector<Centroids>& centroids, Coord* residual);
+void GetResidual(const Point& point, const CoarseQuantization& coarse_quantizations,
+                 const vector<float*>& centroids, Coord* residual);
 
 /**
  * This function finds nearest cluster identifiers for points from start_pid to final_pid.
