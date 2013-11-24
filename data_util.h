@@ -491,7 +491,7 @@ void fillVector(const string& filename,
   for(int thread_id = 0; thread_id < treads_count; ++thread_id) {
     int start_record_id = chunk_size * thread_id;
     index_threads.create_thread(boost::bind(readSubVector<T>, filename, start_record_id,
-                                            chunk_size, output));
+                                            chunk_size, records_count, output));
   }
   index_threads.join_all();
 }
