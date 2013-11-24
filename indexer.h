@@ -353,7 +353,7 @@ void MultiIndexer<Record>::PrepareCoarseQuantization(const string& points_filena
     transposed_coarse_quantizations[i].resize(points_count);
     multiindex_table_dimensions.push_back(coarse_vocabs[i].size());
   }
-  point_in_cells_count_.Resize(multiindex_table_dimensions);
+  //point_in_cells_count_.Resize(multiindex_table_dimensions);
   cout << "Memory for coarse quantizations allocated" << endl;
   boost::thread_group index_threads;
   int thread_points_count = points_count / THREADS_COUNT;
@@ -377,14 +377,14 @@ void MultiIndexer<Record>::ConvertPointsInCellsCountToCellEdges() {
   cout << "Converting points in cells to cell edges...\n";
   multiindex_.cell_edges = point_in_cells_count_;
   multiindex_.cell_edges.table[0] = 0;
-  for(int global_index = 1;
-      global_index < point_in_cells_count_.table.size();
-      ++global_index) {
-    multiindex_.cell_edges.table[global_index] = multiindex_.cell_edges.table[global_index - 1] +
-                                                 point_in_cells_count_.table[global_index - 1];
-  }
+  //for(int global_index = 1;
+  //    global_index < point_in_cells_count_.table.size();
+  //    ++global_index) {
+  //  multiindex_.cell_edges.table[global_index] = multiindex_.cell_edges.table[global_index - 1] +
+  //                                               point_in_cells_count_.table[global_index - 1];
+  //}
   // we do not need this table more
-  point_in_cells_count_.table.clear();
+  //point_in_cells_count_.table.clear();
   cout << "Finish converting points in cells to cell edges...\n";
 }
 
@@ -448,14 +448,14 @@ void MultiIndexer<Record>::FillMultiIndex(const string& points_filename,
   multiindex_.multiindex.resize(points_count);
   cout << "Indexing started..." << endl;
 
-  Multitable<int> points_written_in_index(multiindex_.cell_edges.dimensions);
+  //Multitable<int> points_written_in_index(multiindex_.cell_edges.dimensions);
   int thread_points_count = points_count / THREADS_COUNT;
   boost::thread_group threads;
   for(int thread_id = 0; thread_id < THREADS_COUNT; ++thread_id) {
     PointId start_pid = thread_points_count * thread_id;
-    threads.create_thread(boost::bind(&MultiIndexer::FillMultiIndexForSubset, this, points_filename, start_pid,
-                                      thread_points_count, boost::cref(coarse_vocabs),
-                                      boost::cref(fine_vocabs), mode, &points_written_in_index));
+    //threads.create_thread(boost::bind(&MultiIndexer::FillMultiIndexForSubset, this, points_filename, start_pid,
+    //                                  thread_points_count, boost::cref(coarse_vocabs),
+    //                                  boost::cref(fine_vocabs), mode, &points_written_in_index));
   }
   threads.join_all();
   cout << "Indexing finished..." << endl;
@@ -469,7 +469,7 @@ void MultiIndexer<Record>::RestorePointsInCellsCountFromCourseQuantization(const
   for(int i = 0; i < multiplicity_; ++i) {
     dimensions.push_back(coarse_vocabs[i].size());
   }
-  point_in_cells_count_.Resize(dimensions);
+  //point_in_cells_count_.Resize(dimensions);
   ifstream coarse_quantization_stream;
   coarse_quantization_stream.open(coarse_quantization_filename_.c_str(), ios::binary);
   if(!coarse_quantization_stream.good()) {
@@ -510,7 +510,7 @@ void MultiIndexer<Record>::BuildMultiIndex(const string& points_filename,
                                                   points_count,
                                                   coarse_vocabs);
   }
-  FillMultiIndex(points_filename, points_count, coarse_vocabs, fine_vocabs, mode);
+  //FillMultiIndex(points_filename, points_count, coarse_vocabs, fine_vocabs, mode);
   cout << "Multiindex created" << endl;
   SerializeMultiIndexFiles();
   cout << "Multiindex serialized" << endl;
