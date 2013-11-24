@@ -200,9 +200,9 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   do_rerank_ = do_rerank;
   subspace_centroids_to_consider_ = subspace_centroids_to_consider;
   rerank_mode_ = mode;
-  merger_.GetYieldedItems().length = std::pow((float)subspace_centroids_to_consider,
+  merger_.GetYieldedItems().table.size() = std::pow((float)subspace_centroids_to_consider,
 		                                         (int)coarse_vocabs_.size());
-  merger_.GetYieldedItems().table = new char(merger_.GetYieldedItems().length);
+  merger_.GetYieldedItems().table = new char(merger_.GetYieldedItems().table.size());
   for(int i = 0; i < multiplicity_; ++i) {
     merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
   }
@@ -227,7 +227,7 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
     fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
   }
   fclose(rerank_vocabs_file);
-  multiindex_.cell_edges.length = std::pow((float)coarseK, coarseM);
+  multiindex_.cell_edges.table.size() = std::pow((float)coarseK, coarseM);
   fillVector<int>(cell_edges_filename, &(multiindex_.cell_edges.table));
   fillVector<Record>(index_filename, &(multiindex_.multiindex));
   PrecomputeData();

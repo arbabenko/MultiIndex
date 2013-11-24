@@ -143,7 +143,7 @@ int SetOptions(int argc, char** argv) {
 
 template<class TSearcher>
 void TestSearcher(TSearcher& searcher,
-                  const Points& queries,
+                  Points& queries,
                   const vector<vector<PointId> >& groundtruth) {
   searcher.Init(index_filename,
                 cell_edges_filename,

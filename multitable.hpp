@@ -37,7 +37,7 @@ struct Multitable {
  /**
   *  Actual data as one-dimensional array
   */
-  T* table;
+  vector<T> table;
  /**
   *  Dimensions of table
   */
@@ -55,7 +55,6 @@ struct Multitable {
   *  @param cell_indices coordinates of cell in the table
   */
   int GetCellGlobalIndex(const vector<int>& cell_indices) const;
-  int length;
 };
 
 template<class T>
@@ -64,7 +63,7 @@ int Multitable<T>::GetCellGlobalIndex(const vector<int>& indices) const {
     throw std::logic_error("Empty indices array!");
   }
   int global_index = 0;
-  int subtable_capacity = length;
+  int subtable_capacity = table.size();
   for(int dimension_index = 0; dimension_index < dimensions.size(); ++dimension_index) {
     subtable_capacity = subtable_capacity / dimensions[dimension_index];
     global_index += subtable_capacity * indices[dimension_index];
