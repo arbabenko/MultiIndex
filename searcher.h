@@ -5,8 +5,7 @@
 
 #include <algorithm>
 #include <map>
-
-#include <yael/vector.h>
+#include <cstdio>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>

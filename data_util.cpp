@@ -150,3 +150,67 @@ void GetPointsCoarseQuaintizations(const Points& points,
     }
   }
 }
+
+long fvecs_fread (FILE * f, float * v, long n, int d_alloc)
+{
+  return xvecs_fread(sizeof(float), f, v, n, d_alloc);
+}
+
+static long xvecs_fread (long unit_size, FILE * f, void * v, long n, int d_alloc)
+{
+  long i = 0, d = -1, ret;
+  for (i = 0 ; i < n ; i++) {
+    if (feof (f))
+      break;
+
+    ret = xvec_fread (unit_size, f, (char *) v + unit_size * i * d, d_alloc);
+
+    if (ret == 0)  /* eof */
+      break;
+
+    if (ret == -1) /* err */
+      return 0;
+
+    if (i == 0) {
+      d = ret;
+      if(d != d_alloc) 
+	fprintf(stderr, "xvecs_fread: warn allocated d = %d, found d = %ld\n",
+		d_alloc, d);
+    }
+      
+
+    if (d != ret) {
+      perror ("# xvecs_fread: dimension of the vectors is not consistent\n");
+      return 0;
+    }
+  }
+  return i;
+}
+
+static int xvec_fread (long unit_size, FILE * f, void * v, int d_alloc)
+{
+  int d;
+  int ret = fread (&d, sizeof (int), 1, f);
+
+  if (feof (f))
+    return 0;
+
+  if (ret != 1) {
+    perror ("# xvec_fread error 1");
+    return -1;
+  }
+
+  if (d < 0 || d > d_alloc) {
+    fprintf(stderr, "xvec_fread: weird vector size (expect %d found %d)\n", d_alloc, d);
+    return -1;
+  }
+
+  ret = fread (v, unit_size, d, f);
+  if (ret != d) {
+    perror ("# xvec_fread error 2");
+    return -1;
+  }
+
+  return d;
+}
+

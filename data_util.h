@@ -496,7 +496,11 @@ void fillVector(const string& filename,
   index_threads.join_all();
 }
 
+long fvecs_fread (FILE * f, float * v, long n, int d_alloc);
 
+static long xvecs_fread (long unit_size, FILE * f, void * v, long n, int d_alloc);
+
+static int xvec_fread (long unit_size, FILE * f, void * v, int d_alloc);
 
 
 
