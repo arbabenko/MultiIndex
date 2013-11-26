@@ -105,4 +105,21 @@ IF(WIN32)
 TARGET_LINK_LIBRARIES (searcher_tester mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib)
 ENDIF(WIN32)
 
+##########################################################################################
+INCLUDE (${Source_Path}/RerankToIndex.cmake NO_POLICY_SCOPE)
+INCLUDE_DIRECTORIES(${BOOST_DIR})
+INCLUDE_DIRECTORIES(${BLAS_DIR})
+LINK_DIRECTORIES(${BOOST_LIB})
+LINK_DIRECTORIES(${BLAS_LIB})
+INCLUDE_DIRECTORIES(${Source_Path})
+ADD_EXECUTABLE (rerank_to_index ${RerankToIndex})
+TARGET_LINK_LIBRARIES (rerank_to_index  nearest_search_lib)
+target_link_libraries( rerank_to_index ${Boost_LIBRARIES} )
+IF (UNIX)
+TARGET_LINK_LIBRARIES (rerank_to_index libmkl_intel_ilp64.a libmkl_gnu_thread.a libmkl_core.a dl pthread m)
+ENDIF (UNIX)
+IF(WIN32)
+TARGET_LINK_LIBRARIES (rerank_to_index mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib)
+ENDIF(WIN32)
+
 
