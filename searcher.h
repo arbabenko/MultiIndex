@@ -229,15 +229,14 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   }
   fclose(coarse_vocabs_file);
   std::cout << "CV OK\n";
+  FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename.c_str(), "r");
   if(!local_vocabs_mode) {
-      FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename.c_str(), "r");
       fine_vocabs_.resize(rerankM);
       for (int m = 0; m < rerankM; ++m){
         fine_vocabs_[m] = new float[rerankK * SPACE_DIMENSION / rerankM];
         fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
       }
   } else {
-    FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename.c_str(), "r");
     fine_vocabs_.resize(rerankM * coarseK);
     for (int m = 0; m < rerankM * coarseK; ++m){
       fine_vocabs_[m] = new float[rerankK * SPACE_DIMENSION / rerankM];
