@@ -72,6 +72,8 @@ int rerankM = 8;
 int rerankK = 256;
 int THREADS_COUNT = 32;
 
+bool local_vocabs_mode;
+
 
 
 int SetOptions(int argc, char** argv) {
@@ -91,6 +93,7 @@ int SetOptions(int argc, char** argv) {
     ("query_point_type,t", value<string>())
     ("do_rerank,l", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
+    ("local_vocabs_mode", bool_switch(), "Flag L")
     ("report_file,o", value<string>())
     ("space_dim,d", value<int>())
     ("multi,m", value<int>())
@@ -132,6 +135,7 @@ int SetOptions(int argc, char** argv) {
   multiplicity =               name_to_value["multi"].as<int>();
  
   do_rerank =                  (name_to_value["do_rerank"].as<bool>() == true) ? true : false;
+  local_vocabs_mode =          (name_to_value["local_vocabs_mode"].as<bool>() == true) ? true : false;
   mode =                       (name_to_value["use_residuals"].as<bool>() == true) ? USE_RESIDUALS : USE_INIT_POINTS;
   if (name_to_value["query_point_type"].as<string>() == "FVEC") {
     query_point_type = FVEC;
