@@ -1,7 +1,7 @@
 cd build_localVoc
 ./searcher_tester \
---index_file="/sata/ResearchData/indexGlobal_1000000.dat" \
---cell_edges="/sata/ResearchData/cellStarts_1000000.dat" \
+--index_file="/sata/ResearchData/indexGlobal_1000000000.dat" \
+--cell_edges="/sata/ResearchData/cellStarts_1000000000.dat" \
 --coarse_rotation_file="/sata/ResearchData/coarseRotation.fvecs" \
 --rerank_rotation_file="/sata/ResearchData/rerankRotations.fvecs" \
 --coarse_vocabs_file="/sata/ResearchData/coarseVoc.fvecs" \
@@ -11,9 +11,10 @@ cd build_localVoc
 --space_dim=128 \
 --subspaces_centroids_count=1024 \
 --queries_file="/sata/ResearchData/BigAnn/bases/sift1B_queries.bvecs" \
---groundtruth_file="/sata/ResearchData/BigAnn/gnd/sift1M_groundtruth.ivecs" \
---queries_count=100 \
---neighbours_count=10000 \
+--groundtruth_file="/sata/ResearchData/BigAnn/gnd/sift1B_groundtruth.ivecs" \
+--queries_count=1000 \
+--neighbours_count=30000 \
 --report_file="sift1M_4096_8_report.txt" \
---do_rerank \
---multi=2
+--multi=2 \
+--do_rerank
+

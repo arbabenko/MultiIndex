@@ -164,11 +164,11 @@ void TestSearcher(TSearcher& searcher,
       //neighbours_count = 10000;
       result.clear();
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
-      std::cout << groundtruth[i][0] << " Ground "<< std::endl;
-      for(int r =0; r < 100; ++r) {
-        std::cout << result[r].second<< ","<<result[r].first << " ";
-      }
-      std::cout << std::endl;
+      //std::cout << groundtruth[i][0] << " Ground "<< std::endl;
+      //for(int r =0; r < 100; ++r) {
+      //  std::cout << result[r].second<< ","<<result[r].first << " ";
+      //}
+      //std::cout << std::endl;
       recalls[0] += GetRecallAt(1, groundtruth[i], result);
       recalls[1] += GetRecallAt(10, groundtruth[i], result);
       recalls[2] += GetRecallAt(100, groundtruth[i], result);

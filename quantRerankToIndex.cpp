@@ -31,11 +31,15 @@ int main() {
   vector<int> points_written(16384 * 16384);
   vector<RerankADC8> index(1000000000);
   for(int pid = 0; pid < 1000000000; ++pid) {
+      if(pid % 1000000 == 0) {
+        std::cout << pid << std::endl;
+      }
       int cell_id = (int)quantizations[pid] * 16384 + quantizations[pid + 1000000000];
       index[cell_starts[cell_id] + points_written[cell_id]].pid = pid;
-      for(int q = 0; q < 8; ++q) {
-          index[cell_starts[cell_id] + points_written[cell_id]].quantizations[q] = rerank_info[pid].bytes[q];
-      }
+      memcpy(&(index[cell_starts[cell_id] + points_written[cell_id]].quantizations[0]), &(rerank_info[pid].bytes[0]), 8);
+      //for(int q = 0; q < 8; ++q) {
+      //    index[cell_starts[cell_id] + points_written[cell_id]].quantizations[q] = rerank_info[pid].bytes[q];
+      //}
       points_written[cell_id] += 1;
   }
   std::ofstream out(index_filename.c_str(), std::ios::out | std::ios::binary);

@@ -238,7 +238,7 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   std::cout << "RV OK\n";
   fillVector<int>(cell_edges_filename, std::pow((float)coarseK, coarseM), THREADS_COUNT, &(multiindex_.cell_edges.table));
   std::cout << "CE OK\n";
-  fillVector<Record>(index_filename, 1000000, THREADS_COUNT, &(multiindex_.multiindex));
+  fillVector<Record>(index_filename, 1000000000, THREADS_COUNT, &(multiindex_.multiindex));
   std::cout << "ID OK\n";
   PrecomputeData();
 }
