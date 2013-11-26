@@ -91,7 +91,6 @@ int SetOptions(int argc, char** argv) {
     ("query_point_type,t", value<string>())
     ("do_rerank,l", bool_switch(), "Flag B")
     ("use_residuals,r", bool_switch(), "Flag R")
-    ("points_count,p", value<int>())
     ("report_file,o", value<string>())
     ("space_dim,d", value<int>())
     ("multi,m", value<int>())
@@ -122,7 +121,7 @@ int SetOptions(int argc, char** argv) {
   coarse_vocabs_filename =     name_to_value["coarse_vocabs_file"].as<string>();
   rerank_vocabs_filename =     name_to_value["rerank_vocabs_file"].as<string>();
   rerank_rotations_filename =  name_to_value["rerank_rotation_file"].as<string>();
-  coarse_rotation_filename =   name_to_value["coarse_rotation_filename"].as<string>();
+  coarse_rotation_filename =   name_to_value["coarse_rotation_file"].as<string>();
   SPACE_DIMENSION =            name_to_value["space_dim"].as<int>();
   queries_file =               name_to_value["queries_file"].as<string>();
   report_file =                name_to_value["report_file"].as<string>();
@@ -162,9 +161,14 @@ void TestSearcher(TSearcher& searcher,
     clock_t start = clock();
     for(int i = 0; i < queries_count; ++i) {
       std::cout << i << std::endl;
-      neighbours_count = 10000;
+      //neighbours_count = 10000;
       result.clear();
       searcher.GetNearestNeighbours(queries[i], neighbours_count, &result);
+      std::cout << groundtruth[i][0] << " Ground "<< std::endl;
+      for(int r =0; r < 100; ++r) {
+        std::cout << result[r].second<< ","<<result[r].first << " ";
+      }
+      std::cout << std::endl;
       recalls[0] += GetRecallAt(1, groundtruth[i], result);
       recalls[1] += GetRecallAt(10, groundtruth[i], result);
       recalls[2] += GetRecallAt(100, groundtruth[i], result);

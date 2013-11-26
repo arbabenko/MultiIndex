@@ -155,6 +155,7 @@ inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
   * Struct for BLAS
   */
   mutable float* residual_;
+  mutable float* rotated_residual_;
  /**
   * Number of nearest to query centroids
   * to consider for each dimension
@@ -201,31 +202,44 @@ void MultiSearcher<Record, MetaInfo>::Init(const string& index_filename,
   rerank_mode_ = mode;
   merger_.GetYieldedItems().table = vector<char>(std::pow((float)subspace_centroids_to_consider, coarseM));
   for(int i = 0; i < multiplicity_; ++i) {
+    multiindex_.cell_edges.dimensions.push_back(coarseK);
     merger_.GetYieldedItems().dimensions.push_back(subspace_centroids_to_consider);
   }
+  coarse_rotation_ = new float[SPACE_DIMENSION * SPACE_DIMENSION];
   fvecs_fread(fopen(coarse_rotation_filename.c_str(), "r"), coarse_rotation_,
               SPACE_DIMENSION, SPACE_DIMENSION);
+  //std::cout << coarse_rotation_[0] << " " << coarse_rotation_[1] << "CR OK\n";
   FILE* rerank_matrix_file = fopen(rerank_rotations_filename.c_str(), "r");
   residuals_rotations_.resize(multiplicity_);
   for (int m = 0; m < multiplicity_; ++m){
+    residuals_rotations_[m] = new float[(SPACE_DIMENSION / multiplicity_) *
+                                        (SPACE_DIMENSION / multiplicity_)];
     fvecs_fread(rerank_matrix_file, residuals_rotations_[m], 
                 SPACE_DIMENSION / multiplicity_, SPACE_DIMENSION / multiplicity_);
+    //std::cout << residuals_rotations_[m][0] << " " << residuals_rotations_[m][1] << std::endl;
   }
   fclose(rerank_matrix_file);
+  std::cout << "RR OK\n";
   FILE* coarse_vocabs_file = fopen(coarse_vocabs_filename.c_str(), "r");
   coarse_vocabs_.resize(multiplicity_);
   for (int m = 0; m < multiplicity_; ++m){
+    coarse_vocabs_[m] = new float[coarseK * SPACE_DIMENSION / multiplicity_];
     fvecs_fread(coarse_vocabs_file, coarse_vocabs_[m], coarseK, SPACE_DIMENSION / multiplicity_);
   }
   fclose(coarse_vocabs_file);
+  std::cout << "CV OK\n";
   FILE* rerank_vocabs_file = fopen(rerank_vocabs_filename.c_str(), "r");
   fine_vocabs_.resize(rerankM);
   for (int m = 0; m < rerankM; ++m){
+    fine_vocabs_[m] = new float[rerankK * SPACE_DIMENSION / rerankM];
     fvecs_fread(rerank_vocabs_file, fine_vocabs_[m], rerankK, SPACE_DIMENSION / rerankM);
   }
   fclose(rerank_vocabs_file);
-  fillVector<int>(cell_edges_filename, THREADS_COUNT, &(multiindex_.cell_edges.table));
-  fillVector<Record>(index_filename, THREADS_COUNT, &(multiindex_.multiindex));
+  std::cout << "RV OK\n";
+  fillVector<int>(cell_edges_filename, std::pow((float)coarseK, coarseM), THREADS_COUNT, &(multiindex_.cell_edges.table));
+  std::cout << "CE OK\n";
+  fillVector<Record>(index_filename, 1000000, THREADS_COUNT, &(multiindex_.multiindex));
+  std::cout << "ID OK\n";
   PrecomputeData();
 }
 
@@ -234,7 +248,7 @@ void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
   coarse_centroids_norms_.resize(coarseM);
   int vocab_dim = SPACE_DIMENSION / coarseM;
   for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
-    coarse_centroids_norms_.resize(coarseK);
+    coarse_centroids_norms_[coarse_id].resize(coarseK);
     for(int k = 0; k < coarseK; ++k) {
       coarse_centroids_norms_[coarse_id][k] = cblas_sdot(vocab_dim, 
                                                          coarse_vocabs_[coarse_id] + vocab_dim * k, 1,
@@ -243,6 +257,7 @@ void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
   }
   products_ = new Coord[coarseK];
   residual_ = new Coord[SPACE_DIMENSION];
+  rotated_residual_ = new Coord[SPACE_DIMENSION];
 }
 
 template<class Record, class MetaInfo>
@@ -303,6 +318,7 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   vector<int> cell_coordinates(cell_inner_indices.size());
   for(int list_index = 0; list_index < merger_.lists_ptr->size(); ++list_index) {
     cell_coordinates[list_index] = merger_.lists_ptr->at(list_index)[cell_inner_indices[list_index]].second;
+    //std::cout << cell_coordinates[list_index] << "\n";
   }
   int cell_start, cell_finish;
   before = clock();
@@ -314,11 +330,13 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   }
   typename vector<Record>::const_iterator it = multiindex_.multiindex.begin() + cell_start;
   GetResidual(point, cell_coordinates, coarse_vocabs_, residual_);
+  memset(rotated_residual_, 0, sizeof(Coord)*SPACE_DIMENSION);
   for(int m = 0; m < coarseM; ++m) {
     cblas_sgemv(CblasRowMajor, CblasNoTrans, SPACE_DIMENSION / coarseM, SPACE_DIMENSION / coarseM, 1,
                 residuals_rotations_[m], SPACE_DIMENSION / coarseM,
-                &(residual_[m * SPACE_DIMENSION / coarseM]), 1, 0, &(residual_[m * SPACE_DIMENSION / coarseM]), 1);      
+                residual_ + m * SPACE_DIMENSION / coarseM, 1, 0, rotated_residual_ + m * SPACE_DIMENSION / coarseM, 1);      
   }
+  memcpy(residual_, rotated_residual_, sizeof(float)*SPACE_DIMENSION);
   cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
     if(rerank_mode_ == USE_RESIDUALS) {
@@ -349,8 +367,11 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k,
   perf_tester_.search_start = start;
   clock_t before = clock();
   // rotate point (OPQ)
+  Point rotated_point(point.size(), 0);
   cblas_sgemv(CblasRowMajor, CblasNoTrans, SPACE_DIMENSION, SPACE_DIMENSION, 1,
-              coarse_rotation_, SPACE_DIMENSION, &(point[0]), 1, 0, &(point[0]), 1);
+              coarse_rotation_, SPACE_DIMENSION, &(point[0]), 1, 0, &(rotated_point[0]), 1);
+  std::cout << rotated_point[0] << " " << rotated_point[1] << " " << rotated_point[2] << std::endl;
+  point = rotated_point;
   vector<NearestSubspaceCentroids> subspaces_short_lists;
   assert(subspace_centroids_to_consider_ > 0);
   GetNearestSubspacesCentroids(point, subspace_centroids_to_consider_, &subspaces_short_lists);
@@ -365,12 +386,16 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k,
   bool traverse_next_cell = true;
   int cells_visited = 0;
   while(found_neghbours_count_ < k && traverse_next_cell) {
+    //if(found_neghbours_count_ > 0) {
+    //  std::cout << neighbours->at(found_neghbours_count_-1).first << " " << neighbours->at(found_neghbours_count_-1).second << "\n";
+   // }
     perf_tester_.cells_traversed += 1;
     traverse_next_cell = TraverseNextMultiIndexCell(point, neighbours);
     cells_visited += 1;
   }
   clock_t after_traversal = clock();
   perf_tester_.full_traversal_time += after_traversal - before_traversal;
+  neighbours->resize(found_neghbours_count_);
   if(do_rerank_) {
     std::sort(neighbours->begin(), neighbours->end());
   }

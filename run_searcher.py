@@ -5,7 +5,7 @@ import datetime
 ############# launch configuration #################
 
 # folder to keep built binaries in
-build_folder = './build_master'
+build_folder = './build_localVoc'
 
 
 # Folder with BigAnn base

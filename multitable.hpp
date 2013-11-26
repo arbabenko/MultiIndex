@@ -64,6 +64,7 @@ int Multitable<T>::GetCellGlobalIndex(const vector<int>& indices) const {
   }
   int global_index = 0;
   int subtable_capacity = table.size();
+  //std::cout << indices[0] << "\n";
   for(int dimension_index = 0; dimension_index < dimensions.size(); ++dimension_index) {
     subtable_capacity = subtable_capacity / dimensions[dimension_index];
     global_index += subtable_capacity * indices[dimension_index];

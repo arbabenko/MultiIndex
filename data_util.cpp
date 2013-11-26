@@ -162,7 +162,6 @@ static long xvecs_fread (long unit_size, FILE * f, void * v, long n, int d_alloc
   for (i = 0 ; i < n ; i++) {
     if (feof (f))
       break;
-
     ret = xvec_fread (unit_size, f, (char *) v + unit_size * i * d, d_alloc);
 
     if (ret == 0)  /* eof */
@@ -191,7 +190,7 @@ static int xvec_fread (long unit_size, FILE * f, void * v, int d_alloc)
 {
   int d;
   int ret = fread (&d, sizeof (int), 1, f);
-
+  //std::cout << "D " << d << std::endl;
   if (feof (f))
     return 0;
 
@@ -206,6 +205,8 @@ static int xvec_fread (long unit_size, FILE * f, void * v, int d_alloc)
   }
 
   ret = fread (v, unit_size, d, f);
+  //float* cc = (float*)v;
+  //std::cout << "V[0] " << *cc << std::endl;
   if (ret != d) {
     perror ("# xvec_fread error 2");
     return -1;

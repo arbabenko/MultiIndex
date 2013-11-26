@@ -439,6 +439,7 @@ template<class T>
 inline T readFromFile(std::ifstream& input) {
     T result;
     input.read((char*)&result, sizeof(T));
+    //std::cout << result << " ";
     return result;
 }
 
@@ -449,6 +450,7 @@ inline RerankADC8 readFromFile(std::ifstream& input) {
     for(int q = 0; q < 8; ++q){
         input.read((char*)&(record.quantizations[q]), sizeof(unsigned char));
     }
+   // std::cout << record.pid << " ";
     return record;
 }
 
@@ -479,12 +481,9 @@ void readSubVector(const string& filename,
 
 template<class T>
 void fillVector(const string& filename,
+                int records_count,
                 int treads_count,
                 vector<T>* output) {
-  std::ifstream in(filename.c_str(), std::ifstream::in | std::ifstream::binary);
-  in.seekg(0, std::ifstream::end);
-  int records_count = in.tellg() / sizeof(T);
-  in.close();
   output->resize(records_count);
   int chunk_size = records_count / treads_count;
   boost::thread_group index_threads;
@@ -494,6 +493,9 @@ void fillVector(const string& filename,
                                             chunk_size, records_count, output));
   }
   index_threads.join_all();
+  //for(int i = 0; i < 1000; ++i) {
+  //  std::cout << output->at(i).pid << " ";
+  //}
 }
 
 long fvecs_fread (FILE * f, float * v, long n, int d_alloc);
