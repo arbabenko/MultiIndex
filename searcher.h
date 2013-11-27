@@ -174,7 +174,6 @@ inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
   * Rotation of residuals (OPQ)
   */
   vector<float*> residuals_rotations_;
-  vector<float*> cell_vocabs_;
 };
 
 template<class Record, class MetaInfo>
@@ -267,9 +266,6 @@ void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
   products_ = new Coord[coarseK];
   residual_ = new Coord[SPACE_DIMENSION];
   rotated_residual_ = new Coord[SPACE_DIMENSION];
-  for(int m = 0; m < rerankM; ++m) {
-    cell_vocabs_[m] = new float[rerankK * SPACE_DIMENSION / rerankM];
-  }
 }
 
 template<class Record, class MetaInfo>
@@ -357,9 +353,7 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
     if(!local_vocabs_mode) {
       cell_fine_vocabs.push_back(fine_vocabs_[coarse_id * vocPerCoarse + voc_id]);
     } else {
-      memcpy(cell_vocabs_[coarse_id * vocPerCoarse + voc_id], 
-             fine_vocabs_[coarse_part + voc_id], sizeof(float) * rerankK * SPACE_DIMENSION / rerankM);
-      cell_fine_vocabs.push_back(cell_vocabs_[coarse_id * vocPerCoarse + voc_id]);
+      cell_fine_vocabs.push_back(fine_vocabs_[coarse_part + voc_id]);
     }
   }
   }
@@ -435,38 +429,11 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
   result->second = record.pid;
   int subvectors_dim = SPACE_DIMENSION / rerankM;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  //for(int centroid_index = 0; centroid_index < rerankM; ++centroid_index) {
-  //  int start_dim = centroid_index * subvectors_dim;
-  //  int final_dim = start_dim + subvectors_dim;
-  //  FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
-  //  rerank_info_ptr += sizeof(FineClusterId);
-  //  Distance subvector_distance = 0;
-  //  if(!local_vocabs_mode) {
-  //    for(int i = start_dim; i < final_dim; ++i) {
-  //      Coord diff = fine_vocabs[centroid_index][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
-  //      subvector_distance += diff * diff;
-  //    }
-  //  } else {
-  //    float* rerank_vocab = fine_vocabs[(centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
-  //                               cell_coordinates[centroid_index / vocPerCoarse] * vocPerCoarse +
-  //                               centroid_index % vocPerCoarse];
-  //    for(int i = start_dim; i < final_dim; ++i) {
-  //      Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
-  //      subvector_distance += diff * diff;
-  //    }
-  //  }
-  //  result->first += subvector_distance;
-  //}
   int vocab_index = 0;
   for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
     int current_coordinate =  cell_coordinates[coarse_id];
     int coarse_part_of_index = coarse_id * coarseK * vocPerCoarse + current_coordinate * vocPerCoarse;
     for(int v = 0; v < vocPerCoarse; ++v) {
-      //if(!local_vocabs_mode) {
-      //  vocab_index = coarse_id * vocPerCoarse + v;
-      //} else {
-      //  vocab_index = coarse_part_of_index + v;
-     // }
       vocab_index = coarse_id * vocPerCoarse + v;
       int start_dim = vocab_index * subvectors_dim;
       int final_dim = start_dim + subvectors_dim;
