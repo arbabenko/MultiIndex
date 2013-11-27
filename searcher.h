@@ -379,7 +379,6 @@ void MultiSearcher<Record, MetaInfo>::GetNearestNeighbours(Point& point, int k,
   Point rotated_point(point.size(), 0);
   cblas_sgemv(CblasRowMajor, CblasNoTrans, SPACE_DIMENSION, SPACE_DIMENSION, 1,
               coarse_rotation_, SPACE_DIMENSION, &(point[0]), 1, 0, &(rotated_point[0]), 1);
-  std::cout << rotated_point[0] << " " << rotated_point[1] << " " << rotated_point[2] << std::endl;
   point = rotated_point;
   vector<NearestSubspaceCentroids> subspaces_short_lists;
   assert(subspace_centroids_to_consider_ > 0);
@@ -432,10 +431,14 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
         subvector_distance += diff * diff;
       }
     } else {
+        //std::cout << (centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
+        //                         cell_coordinates[centroid_index / coarseM] * vocPerCoarse +
+        //                         centroid_index % vocPerCoarse << std::endl;
+      float* rerank_vocab = fine_vocabs[(centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
+                                 cell_coordinates[centroid_index / vocPerCoarse] * vocPerCoarse +
+                                 centroid_index % vocPerCoarse];
       for(int i = start_dim; i < final_dim; ++i) {
-        Coord diff = fine_vocabs[(centroid_index / coarseM) * coarseK + 
-                                 cell_coordinates[centroid_index / coarseM] * vocPerCoarse + 
-                                 centroid_index % coarseM][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+        Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
         subvector_distance += diff * diff;
       }
     }

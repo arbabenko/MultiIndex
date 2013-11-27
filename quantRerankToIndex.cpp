@@ -18,10 +18,10 @@ inline RerankBytes readFromFile(std::ifstream& input) {
 }
 
 int main() {
-  string rerank_bytes_filename = "/sata/ResearchData/rerBytesGlobal_1000000000.dat";
+  string rerank_bytes_filename = "/sata/ResearchData/rerBytesLocal_1000000000.dat";
   string cell_starts_filename = "/sata/ResearchData/cellStarts_1000000000.dat";
   string quantizations_filename = "/sata/ResearchData/cq_1000000000.dat";
-  string index_filename = "/sata/ResearchData/indexGlobal_1000000000.dat";
+  string index_filename = "/sata/ResearchData/indexLocal_1000000000.dat";
   vector<RerankBytes> rerank_info;
   fillVector<RerankBytes>(rerank_bytes_filename, 1000000000, 32, &rerank_info);
   vector<int> cell_starts;
@@ -31,7 +31,7 @@ int main() {
   vector<int> points_written(16384 * 16384);
   vector<RerankADC8> index(1000000000);
   for(int pid = 0; pid < 1000000000; ++pid) {
-      if(pid % 1000000 == 0) {
+      if(pid % 1000000000 == 0) {
         std::cout << pid << std::endl;
       }
       int cell_id = (int)quantizations[pid] * 16384 + quantizations[pid + 1000000000];
