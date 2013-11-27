@@ -347,15 +347,25 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   }
   memcpy(residual_, rotated_residual_, sizeof(float)*SPACE_DIMENSION);
   cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
+  vector<float*> cell_fine_vocabs;
+  for(int voc_id = 0; voc_id < rerankM; ++voc_id) {
+    if(!local_vocabs_mode) {
+      cell_fine_vocabs.push_back(fine_vocabs_[voc_id]);
+    } else {
+      cell_fine_vocabs.push_back(fine_vocabs_[(voc_id / vocPerCoarse) * coarseK * vocPerCoarse +
+                                               cell_coordinates[voc_id / vocPerCoarse] * vocPerCoarse +
+                                  voc_id % vocPerCoarse]);
+    }
+  }
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
     if(rerank_mode_ == USE_RESIDUALS) {
       RecordToMetainfoAndDistance<Record, MetaInfo>(residual_, *it,
                                                     &(nearest_subpoints->at(found_neghbours_count_)),
-                                                    cell_coordinates, fine_vocabs_);
+                                                    cell_coordinates, cell_fine_vocabs);
     } else if(rerank_mode_ == USE_INIT_POINTS) {
       RecordToMetainfoAndDistance<Record, MetaInfo>(&(point[0]), *it,
                                                     &(nearest_subpoints->at(found_neghbours_count_)),
-                                                    cell_coordinates, fine_vocabs_);
+                                                    cell_coordinates, cell_fine_vocabs);
     }
     perf_tester_.NextNeighbour();
     ++found_neghbours_count_;
@@ -415,7 +425,7 @@ template<>
 inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point, const RerankADC8& record,
                                                              pair<Distance, PointId>* result,
                                                              const vector<int>& cell_coordinates,
-                                                             const vector<float*>& fine_vocabs) {
+                                                             const vector<float*>& cell_fine_vocabs) {
   result->second = record.pid;
   int subvectors_dim = SPACE_DIMENSION / rerankM;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
@@ -441,27 +451,29 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
   //  }
   //  result->first += subvector_distance;
   //}
+  int vocab_index = 0;
   for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
     int current_coordinate =  cell_coordinates[coarse_id];
     int coarse_part_of_index = coarse_id * coarseK * vocPerCoarse + current_coordinate * vocPerCoarse;
     for(int v = 0; v < vocPerCoarse; ++v) {
-      if(!local_vocabs_mode) {
-        int vocab_index = coarse_id * vocPerCoarse + v;
-      } else {
-        int vocab_index = coarse_part_of_index + v;
+      //if(!local_vocabs_mode) {
+      //  vocab_index = coarse_id * vocPerCoarse + v;
+      //} else {
+      //  vocab_index = coarse_part_of_index + v;
+     // }
+      vocab_index = coarse_id * vocPerCoarse + v;
+      int start_dim = centroid_index * subvectors_dim;
+      int final_dim = start_dim + subvectors_dim;
+      FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
+      rerank_info_ptr += sizeof(FineClusterId);
+      Distance subvector_distance = 0;
+      float* rerank_vocab = fine_vocabs[vocab_index];
+      for(int i = start_dim; i < final_dim; ++i) {
+        Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+        subvector_distance += diff * diff;
       }
+      result->first += subvector_distance;
     }
-    int start_dim = centroid_index * subvectors_dim;
-    int final_dim = start_dim + subvectors_dim;
-    FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
-    rerank_info_ptr += sizeof(FineClusterId);
-    Distance subvector_distance = 0;
-    float* rerank_vocab = fine_vocabs[vocab_index];
-    for(int i = start_dim; i < final_dim; ++i) {
-      Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
-      subvector_distance += diff * diff;
-    }
-    result->first += subvector_distance;
   }
 }
 
