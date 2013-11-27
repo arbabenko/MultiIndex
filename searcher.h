@@ -174,7 +174,7 @@ inline void GetCellEdgesInMultiIndexArray(const vector<int>& cell_coordinates,
   * Rotation of residuals (OPQ)
   */
   vector<float*> residuals_rotations_;
-
+  vector<float*> cell_vocabs_;
 };
 
 template<class Record, class MetaInfo>
@@ -267,6 +267,9 @@ void MultiSearcher<Record, MetaInfo>::PrecomputeData(){
   products_ = new Coord[coarseK];
   residual_ = new Coord[SPACE_DIMENSION];
   rotated_residual_ = new Coord[SPACE_DIMENSION];
+  for(int m = 0; m < rerankM; ++m) {
+    cell_vocabs_[m] = new float[rerankK * SPACE_DIMENSION / rerankM];
+  }
 }
 
 template<class Record, class MetaInfo>
@@ -354,8 +357,11 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
     if(!local_vocabs_mode) {
       cell_fine_vocabs.push_back(fine_vocabs_[coarse_id * vocPerCoarse + voc_id]);
     } else {
-      cell_fine_vocabs.push_back(fine_vocabs_[coarse_part + voc_id]);
+      memcpy(cell_vocabs_[coarse_id * vocPerCoarse + voc_id], 
+             fine_vocabs_[coarse_part + voc_id], sizeof(float) * rerankK * SPACE_DIMENSION / rerankM);
+      cell_fine_vocabs.push_back(cell_vocabs_[coarse_id * vocPerCoarse + voc_id]);
     }
+  }
   }
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
     if(rerank_mode_ == USE_RESIDUALS) {
