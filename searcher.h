@@ -419,28 +419,47 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
   result->second = record.pid;
   int subvectors_dim = SPACE_DIMENSION / rerankM;
   char* rerank_info_ptr = (char*)&record + sizeof(record.pid);
-  for(int centroid_index = 0; centroid_index < rerankM; ++centroid_index) {
+  //for(int centroid_index = 0; centroid_index < rerankM; ++centroid_index) {
+  //  int start_dim = centroid_index * subvectors_dim;
+  //  int final_dim = start_dim + subvectors_dim;
+  //  FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
+  //  rerank_info_ptr += sizeof(FineClusterId);
+  //  Distance subvector_distance = 0;
+  //  if(!local_vocabs_mode) {
+  //    for(int i = start_dim; i < final_dim; ++i) {
+  //      Coord diff = fine_vocabs[centroid_index][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+  //      subvector_distance += diff * diff;
+  //    }
+  //  } else {
+  //    float* rerank_vocab = fine_vocabs[(centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
+  //                               cell_coordinates[centroid_index / vocPerCoarse] * vocPerCoarse +
+  //                               centroid_index % vocPerCoarse];
+  //    for(int i = start_dim; i < final_dim; ++i) {
+  //      Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+  //      subvector_distance += diff * diff;
+  //    }
+  //  }
+  //  result->first += subvector_distance;
+  //}
+  for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
+    int current_coordinate =  cell_coordinates[coarse_id];
+    int coarse_part_of_index = coarse_id * coarseK * vocPerCoarse + current_coordinate * vocPerCoarse;
+    for(int v = 0; v < vocPerCoarse; ++v) {
+      if(!local_vocabs_mode) {
+        int vocab_index = coarse_id * vocPerCoarse + v;
+      } else {
+        int vocab_index = coarse_part_of_index + v;
+      }
+    }
     int start_dim = centroid_index * subvectors_dim;
     int final_dim = start_dim + subvectors_dim;
     FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
     rerank_info_ptr += sizeof(FineClusterId);
     Distance subvector_distance = 0;
-    if(!local_vocabs_mode) {
-      for(int i = start_dim; i < final_dim; ++i) {
-        Coord diff = fine_vocabs[centroid_index][subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
-        subvector_distance += diff * diff;
-      }
-    } else {
-        //std::cout << (centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
-        //                         cell_coordinates[centroid_index / coarseM] * vocPerCoarse +
-        //                         centroid_index % vocPerCoarse << std::endl;
-      float* rerank_vocab = fine_vocabs[(centroid_index / vocPerCoarse) * coarseK * vocPerCoarse +
-                                 cell_coordinates[centroid_index / vocPerCoarse] * vocPerCoarse +
-                                 centroid_index % vocPerCoarse];
-      for(int i = start_dim; i < final_dim; ++i) {
-        Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
-        subvector_distance += diff * diff;
-      }
+    float* rerank_vocab = fine_vocabs[vocab_index];
+    for(int i = start_dim; i < final_dim; ++i) {
+      Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
+      subvector_distance += diff * diff;
     }
     result->first += subvector_distance;
   }
