@@ -348,13 +348,13 @@ bool MultiSearcher<Record, MetaInfo>::TraverseNextMultiIndexCell(const Point& po
   memcpy(residual_, rotated_residual_, sizeof(float)*SPACE_DIMENSION);
   cell_finish = std::min((int)cell_finish, cell_start + (int)nearest_subpoints->size() - found_neghbours_count_);
   vector<float*> cell_fine_vocabs;
-  for(int voc_id = 0; voc_id < rerankM; ++voc_id) {
+  for(int coarse_id = 0; coarse_id < coarseM; ++coarse_id) {
+    int coarse_part = coarse_id * coarseK * vocPerCoarse + cell_coordinates[coarse_id] * vocPerCoarse;
+  for(int voc_id = 0; voc_id < vocPerCoarse; ++voc_id) {
     if(!local_vocabs_mode) {
-      cell_fine_vocabs.push_back(fine_vocabs_[voc_id]);
+      cell_fine_vocabs.push_back(fine_vocabs_[coarse_id * vocPerCoarse + voc_id]);
     } else {
-      cell_fine_vocabs.push_back(fine_vocabs_[(voc_id / vocPerCoarse) * coarseK * vocPerCoarse +
-                                               cell_coordinates[voc_id / vocPerCoarse] * vocPerCoarse +
-                                  voc_id % vocPerCoarse]);
+      cell_fine_vocabs.push_back(fine_vocabs_[coarse_part + voc_id]);
     }
   }
   for(int array_index = cell_start; array_index < cell_finish; ++array_index) {
@@ -462,12 +462,12 @@ inline void RecordToMetainfoAndDistance<RerankADC8, PointId>(const Coord* point,
       //  vocab_index = coarse_part_of_index + v;
      // }
       vocab_index = coarse_id * vocPerCoarse + v;
-      int start_dim = centroid_index * subvectors_dim;
+      int start_dim = vocab_index * subvectors_dim;
       int final_dim = start_dim + subvectors_dim;
       FineClusterId pid_nearest_centroid = *((FineClusterId*)rerank_info_ptr);
       rerank_info_ptr += sizeof(FineClusterId);
       Distance subvector_distance = 0;
-      float* rerank_vocab = fine_vocabs[vocab_index];
+      float* rerank_vocab = cell_fine_vocabs[vocab_index];
       for(int i = start_dim; i < final_dim; ++i) {
         Coord diff = rerank_vocab[subvectors_dim * pid_nearest_centroid + i - start_dim] - point[i];
         subvector_distance += diff * diff;
